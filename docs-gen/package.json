@@ -1,0 +1,58 @@
+{
+  "_from": "discord.js-docs",
+  "_id": "discord.js-docs@0.1.2",
+  "_inBundle": false,
+  "_integrity": "sha512-DrDOJD3odnmGJE8HyVaspAYiUN51LotzqIH/tNq9PydZva+wceVM5dijEBI+g/0hSl1/CQKTIgN3z0dIcMv0CQ==",
+  "_location": "/discord.js-docs",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "discord.js-docs",
+    "name": "discord.js-docs",
+    "escapedName": "discord.js-docs",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/discord.js-docs/-/discord.js-docs-0.1.2.tgz",
+  "_shasum": "65941b3d037346cec220d1b5e0ec8e46aa62697e",
+  "_spec": "discord.js-docs",
+  "_where": "E:\\JavaScript\\Hypixel-API-Reborn-project\\our-awesome-bot",
+  "author": {
+    "name": "TeeSeal",
+    "email": "teesealz@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/TeeSeal/discord.js-docs/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "common-tags": "^1.8.0",
+    "fuse.js": "^3.2.1",
+    "node-fetch": "^2.6.0"
+  },
+  "deprecated": false,
+  "description": "A discord.js docs parser and wrapper.",
+  "devDependencies": {
+    "eslint": "^5.1.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0"
+  },
+  "homepage": "https://github.com/TeeSeal/discord.js-docs#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "name": "discord.js-docs",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/TeeSeal/discord.js-docs.git"
+  },
+  "version": "0.1.2"
+}
