@@ -91,7 +91,7 @@ class TagCommand extends Command {
       }
       default: {
         const tag = await Tag.findOne({ title: args[0].toLowerCase() });
-        if (!tag) return message.reply(`Cannot find tag \`${args[1]}\``);
+        if (!tag) return message.reply(`Cannot find tag \`${args[0]}\``);
         message.channel.send(`${tag.description}`);
         break;
       }
