@@ -35,7 +35,7 @@ class EvalCommand extends Command {
       result = e;
     }
     // eslint-disable-next-line camelcase
-    const o_o = RegExp(`${this.client.config.DISCORD_TOKEN}|${this.client.config.MONGODB_URI}|${this.client.config.HYPIXEL_KEY}`);
+    const o_o = RegExp(`${process.env.DISCORD_TOKEN}|${process.env.MONGODB_URI}|${process.env.HYPIXEL_KEY}`);
     result = inspect(result, { depth: 1 }).replace(o_o, '[👀]');
     const executed = ((Date.now() - start) / 1000).toFixed(2);
     if (result.length > 1000) {
