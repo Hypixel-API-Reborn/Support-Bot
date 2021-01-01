@@ -16,7 +16,7 @@ class Client extends AkairoClient {
   }
 
   async run () {
-    mongoose.connect(this.config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
       this.logger.info('Successfully connected to MongoDB!');
     }).catch(e => {
       this.logger.error('Something went wrong while connecting to MongoDB.');
@@ -24,7 +24,7 @@ class Client extends AkairoClient {
     });
     this.commandHandler.loadAll();
     this.listenerHandler.loadAll();
-    this.login(this.config.DISCORD_TOKEN).then(() => {
+    this.login(process.env.DISCORD_TOKEN).then(() => {
       this.logger.info('Successfully connected to Discord! ' + this.user.tag + ' ready to work!');
     }).catch(e => {
       this.logger.error('Something went wrong while connecting to Discord.');

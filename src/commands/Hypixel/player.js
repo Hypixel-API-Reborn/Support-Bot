@@ -32,7 +32,7 @@ class PlayerCommand extends Command {
    * @param {{player:string, compact:boolean}} args
    */
   async exec (message, args) {
-    const hypixel = new Hypixel.Client(this.client.config.HYPIXEL_KEY, { cache: true });
+    const hypixel = new Hypixel.Client(process.env.HYPIXEL_KEY, { cache: true });
     const user = await User.findOne({ id: message.author.id });
     if (!user && !args.player) return message.reply('I need player nickname.');
     if (user && !args.player) args.player = user.uuid;
