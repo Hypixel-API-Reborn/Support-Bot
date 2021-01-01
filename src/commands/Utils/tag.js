@@ -56,7 +56,7 @@ class TagCommand extends Command {
         if (!this.client.isOwner(message.author)) return message.reply(':eyes: You are lier');
         if (!args[1]) return message.reply('I need tag title. e.g. `guideline-1`.');
         const tag = await Tag.findOne({ title: args[1].toLowerCase() });
-        if (!tag) return message.reply(`Cannot find tag ${args[1]}`);
+        if (!tag) return message.reply(`Cannot find tag ${args[1].replace(/`/gm, '')}`);
         if (!args.slice(2).join(' ')) return message.reply('I need tag description to edit. e.g. `Never gonna give you up, never gonna let you down`.');
         tag.description = args.slice(2).join(' ');
         tag.save().then(() => {
