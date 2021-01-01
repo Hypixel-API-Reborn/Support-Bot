@@ -24,6 +24,16 @@ class PlayerCommand extends Command {
         }
       ]
     });
+    this.UIUtils = {
+      rankSymbols: {
+        Default: ':black_large_square:',
+        VIP: ':green_square:',
+        VIPPlus: ':green_circle:',
+        MVP: ':blue_square:',
+        MVPPlus: ':blue_circle:',
+        MVPPlusPlus: ':yellow_heart:'
+      }
+    }
   }
 
   /**
@@ -40,7 +50,7 @@ class PlayerCommand extends Command {
       if (args.compact) {
         const embedCompact = new MessageEmbed()
           .setColor(this.client.color)
-          .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`, `https://plancke.io/hypixel/player/stats/${player.uuid}`)
+          .setAuthor(`${this.UIUtils.rankSymbols[player.rank.replace(/\+/g, 'Plus')]} ${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`, `https://plancke.io/hypixel/player/stats/${player.uuid}`)
           .setThumbnail(`https://visage.surgeplay.com/face/64/${player.uuid}`)
           .addField('Level', `\`${player.level}\``, true);
         if (player.guild) {
