@@ -24,16 +24,20 @@ class PlayerCommand extends Command {
         }
       ]
     });
-    this.UIUtils = {
-      rankSymbols: {
-        Default: ':black_large_square:',
-        VIP: ':green_square:',
-        VIPPlus: ':green_circle:',
-        MVP: ':blue_square:',
-        MVPPlus: ':blue_circle:',
-        MVPPlusPlus: ':yellow_heart:'
+    this.utils = {
+      rankColors: {
+        Default: '',
+        VIP: 'https://dummyimage.com/32/00ff00/00ff00.png',
+        'VIP+': 'https://dummyimage.com/32/00ff00/00ff00.png',
+        MVP: 'https://dummyimage.com/32/00ffff/00ffff.png',
+        'MVP+': 'https://dummyimage.com/32/00ffff/00ffff.png',
+        'MVP++': 'https://dummyimage.com/32/ffaa00/ffaa00.png',
+        Helper: 'https://dummyimage.com/32/5555FF/5555FF.png',
+        Admin: 'https://dummyimage.com/32/AA0000/AA0000.png',
+        Moderator: 'https://dummyimage.com/32/00AA00/00AA00.png',
+        OWNER: 'https://dummyimage.com/32/AA0000/AA0000.png'
       }
-    }
+    };
   }
 
   /**
@@ -50,7 +54,7 @@ class PlayerCommand extends Command {
       if (args.compact) {
         const embedCompact = new MessageEmbed()
           .setColor(this.client.color)
-          .setAuthor(`${this.UIUtils.rankSymbols[player.rank.replace(/\+/g, 'Plus')]} ${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`, `https://plancke.io/hypixel/player/stats/${player.uuid}`)
+          .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, this.utils.rankColors[player.rank], `https://plancke.io/hypixel/player/stats/${player.uuid}`)
           .setThumbnail(`https://visage.surgeplay.com/face/64/${player.uuid}`)
           .addField('Level', `\`${player.level}\``, true);
         if (player.guild) {
@@ -66,7 +70,7 @@ class PlayerCommand extends Command {
       }
       const embed = new MessageEmbed()
         .setColor(this.client.color)
-        .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`, `https://plancke.io/hypixel/player/stats/${player.uuid}`)
+        .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, this.utils.rankColors[player.rank], `https://plancke.io/hypixel/player/stats/${player.uuid}`)
         .setThumbnail(`https://visage.surgeplay.com/face/64/${player.uuid}`)
         .addField('Level', `\`${player.level}\``, true);
       if (player.guild) {
