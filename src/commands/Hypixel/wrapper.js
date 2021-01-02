@@ -18,7 +18,7 @@ class WrapperCommand extends Command {
         },
         {
           id: 'args',
-          match: 'content'
+          match: 'text'
         },
         {
           id: 'noParse',
@@ -39,7 +39,9 @@ class WrapperCommand extends Command {
     args.args = args.args.split(/ +/);
     if (args.args.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
     args.args.shift();
-    const result = await hypixel[args.method](...args.args);
+    const result = await hypixel[args.method](...args.args).catch(e => {
+      return message.channel.send(`Error occurred: \`${e}\``);
+    });
     if (args.noParse) {
       return message.channel.send('API Result : ', { files: [JSON.stringify(result)] });
     }
