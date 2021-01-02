@@ -1,7 +1,8 @@
 const { Command } = require('discord-akairo');
 const { Message, MessageEmbed } = require('discord.js');
 const User = require('../../structures/models/User');
-const Hypixel = require('hypixel-api-reborn');
+const hypixel = require('../../Hypixel');
+const { Errors } = require('hypixel-api-reborn');
 
 class VerifyCommand extends Command {
   constructor () {
@@ -35,7 +36,6 @@ class VerifyCommand extends Command {
         .setDescription(`Specify your nickname for verification. e.g. \`${this.handler.prefix}${this.id} StavZDev\`\n\n**You need connected Discord as social media on Hypixel Network.**`);
       message.channel.send(start);
     }
-    const hypixel = new Hypixel.Client(this.client.config.HYPIXEL_KEY, { cache: true });
     hypixel.getPlayer(args.nickname).then(async player => {
       if (!player.socialMedia.find(s => s.id === 'DISCORD')) return message.reply('You haven\'t connected Discord to Hypixel Network.');
       if (player.socialMedia.find(s => s.id === 'DISCORD').link !== message.author.tag) return message.reply('Connected Discord tag doesn\'t match your Discord tag.');
@@ -48,7 +48,7 @@ class VerifyCommand extends Command {
         message.reply(`Player \`${player.nickname}\` connected to your account.`);
       });
     }).catch(e => {
-      if (e.message === Hypixel.Errors.PLAYER_DOES_NOT_EXIST) {
+      if (e.message === Errors.PLAYER_DOES_NOT_EXIST) {
         message.reply(`Player \`${args.nickname}\` does not exist.`);
       } else {
         message.reply(`Error occurred: \`${e}\``);
