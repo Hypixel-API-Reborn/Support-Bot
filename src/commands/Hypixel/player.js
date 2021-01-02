@@ -24,6 +24,18 @@ class PlayerCommand extends Command {
         }
       ]
     });
+    this.utils = {
+      rankColors: {
+        Default: '',
+        VIP: 'https://dummyimage.com/32/00ff00/00ff00.png',
+        MVP: 'https://dummyimage.com/32/00ffff/00ffff.png',
+        'MVP++': 'https://dummyimage.com/32/ffaa00/ffaa00.png',
+        Helper: 'https://dummyimage.com/32/5555FF/5555FF.png',
+        Admin: 'https://dummyimage.com/32/AA0000/AA0000.png',
+        Moderator: 'https://dummyimage.com/32/00AA00/00AA00.png',
+        OWNER: 'https://dummyimage.com/32/AA0000/AA0000.png'
+      }
+    };
   }
 
   /**
@@ -39,7 +51,7 @@ class PlayerCommand extends Command {
       if (args.compact) {
         const embedCompact = new MessageEmbed()
           .setColor(this.client.color)
-          .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`, `https://plancke.io/hypixel/player/stats/${player.uuid}`)
+          .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, this.utils.rankColors[player.rank === 'MVP++' ? player.rank : player.rank.replace(/\+/g, '')], `https://plancke.io/hypixel/player/stats/${player.uuid}`)
           .setThumbnail(`https://visage.surgeplay.com/face/64/${player.uuid}`)
           .addField('Level', `\`${player.level}\``, true);
         if (player.guild) {
@@ -55,7 +67,7 @@ class PlayerCommand extends Command {
       }
       const embed = new MessageEmbed()
         .setColor(this.client.color)
-        .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`, `https://plancke.io/hypixel/player/stats/${player.uuid}`)
+        .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, this.utils.rankColors[player.rank === 'MVP++' ? player.rank : player.rank.replace(/\+/g, '')], `https://plancke.io/hypixel/player/stats/${player.uuid}`)
         .setThumbnail(`https://visage.surgeplay.com/face/64/${player.uuid}`)
         .addField('Level', `\`${player.level}\``, true);
       if (player.guild) {

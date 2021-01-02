@@ -1,66 +1,59 @@
 const { Command } = require('discord-akairo');
 const { Message, MessageEmbed } = require('discord.js');
 const User = require('../../structures/models/User');
-const fetch = require('node-fetch');
+const Hypixel = require('hypixel-api-reborn');
 
 class VerifyCommand extends Command {
   constructor () {
     super('verify', {
       aliases: ['verify'],
       description: 'Connect your hypixel account to discord.',
-      channel: 'guild'
+      channel: 'guild',
+      args: [
+        {
+          id: 'nickname',
+          type: (message, phrase) => {
+            if (phrase.length > 16) return null;
+            return phrase;
+          }
+        }
+      ]
     });
   }
 
   /**
    *
    * @param {Message} message
+   * @param {{nickname:string}} args
    */
-  async exec (message) {
+  async exec (message, args) {
     const user = await User.findOne({ id: message.author.id });
     if (user && user.uuid) return message.channel.send({ embed: { color: this.client.color, description: `You already connected your hypixel account to discord.\nUUID: **${user.uuid}**` } });
-    const start = new MessageEmbed()
-      .setColor(this.client.color)
-      .setDescription('You need a Hypixel API key to verify your identity.\n\n**I will make 1 API request for your UUID.\nYou can reset your API key after verification.**');
-    message.channel.send(start).then((msg) => {
-      if (msg.deletable) {
-        msg.delete({ timeout: 15000 });
+    if (!args.nickname) {
+      const start = new MessageEmbed()
+        .setColor(this.client.color)
+        .setDescription(`Specify your nickname for verification. e.g. \`${this.handler.prefix}${this.id} StavZDev\`\n\n**You need connected Discord as social media on Hypixel Network.**`);
+      message.channel.send(start);
+    }
+    const hypixel = new Hypixel.Client(this.client.config.HYPIXEL_KEY, { cache: true });
+    hypixel.getPlayer(args.nickname).then(async player => {
+      if (!player.socialMedia.find(s => s.id === 'DISCORD')) return message.reply('You haven\'t connected Discord to Hypixel Network.');
+      if (player.socialMedia.find(s => s.id === 'DISCORD').link !== message.author.tag) return message.reply('Connected Discord tag doesn\'t match your Discord tag.');
+      const user1 = await User.findOne({ uuid: player.uuid });
+      if (user1) return message.reply('This account already connected to another.');
+      new User({
+        id: message.author.id,
+        uuid: player.uuid
+      }).save(() => {
+        message.reply(`Player \`${player.nickname}\` connected to your account.`);
+      });
+    }).catch(e => {
+      if (e.message === Hypixel.Errors.PLAYER_DOES_NOT_EXIST) {
+        message.reply(`Player \`${args.nickname}\` does not exist.`);
+      } else {
+        message.reply(`Error occurred: \`${e}\``);
       }
     });
-    setTimeout(async () => {
-      const dm = await message.author.createDM().catch(e => {
-        message.channel.send('I can\'t DM you.');
-      });
-      dm.send('Hello!\nYou have 5 minutes to enter you API key for verification.\n\nHow to get API key: <https://stavzdev.is-inside.me/cCMiZdoy.gif>').catch(e => {
-        message.channel.send('I can\'t DM you.');
-      });
-      const collector = dm.createMessageCollector(m => (/([0-9a-z]){8}-([0-9a-z]){4}-([0-9a-z]){4}-([0-9a-z]){4}-([0-9a-z]){12}$/gm).test(m.content), { time: 300000, max: 1 });
-      collector.on('collect', async (m) => {
-        const key = m.content;
-        let res = await fetch(`https://api.hypixel.net/key?key=${key}`);
-        if (res.status !== 200) {
-          return dm.send('Invalid API key!');
-        }
-        res = await res.json();
-        if (!res.success) return dm.send('Try again later!');
-        const user1 = await User.findOne({ uuid: res.record.owner });
-        if (user1) return dm.send('This account is already connected to another.');
-        dm.send(`You API key: ||${key.slice(0, 8) + key.slice(8).replace(/[^-]/g, '•')}||\nYour UUID: **${res.record.owner}**\n**Saving to DB...**`).then(async m => {
-          const newUser = new User({
-            id: message.author.id,
-            uuid: res.record.owner
-          });
-          newUser.save().then(() => {
-            m.edit(m.content.replace('**Saving to DB...**', '**Saved!**'));
-          });
-        });
-      });
-      collector.on('end', (collected) => {
-        if (!collected.size || !(/([0-9a-z]){8}-([0-9a-z]){4}-([0-9a-z]){4}-([0-9a-z]){4}-([0-9a-z]){12}$/gm).test(collected.first().content)) {
-          dm.send('Time is up!');
-        }
-      });
-    }, 5000);
   }
 }
 module.exports = VerifyCommand;

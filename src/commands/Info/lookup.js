@@ -75,6 +75,7 @@ class LookupCommand extends Command {
     const statusEmoji = this.UIUtils.statuses[status];
     const statusType = this.getStatusType(args.member.user, status_types);
     const statusName = statuses[status];
+    const flags = this.getUserFlags(args.member.user);
     const activities = args.member.presence.activities;
     if (args.compact) {
       const embed = this.client.util.embed()
@@ -99,8 +100,11 @@ class LookupCommand extends Command {
       .addField('\u200B', '\u200B', true)
       .addField('Registration date', `${moment(args.member.user.createdAt).calendar()} (\`${moment(args.member.user.createdAt).fromNow()}\`)`, true)
       .addField('Join Date', `${moment(args.member.joinedAt).calendar()} (\`${moment(args.member.joinedAt).fromNow()}\`)`, true)
-      .addField(`Roles [${roles.size == null ? '0' : roles.size}]`, `${roles.size === 0 ? '`None`' : `${roles.roles.join(', ')}`}`)
-      .setFooter(`ID: ${args.member.id}`)
+      .addField(`Roles [${roles.size == null ? '0' : roles.size}]`, `${roles.size === 0 ? '`None`' : `${roles.roles.join(', ')}`}`);
+    if (flags) {
+      embed.addField('User Badges', flags.join(''));
+    }
+    embed.setFooter(`ID: ${args.member.id}`)
       .setThumbnail(args.member.user.avatarURL({ dynamic: true }));
     message.channel.send(embed);
   }
@@ -142,6 +146,11 @@ class LookupCommand extends Command {
       size: first,
       roles
     };
+  }
+
+  getUserFlags (member) {
+    if (!member.flags.bitfield) return null;
+    return member.flags.toArray().map(flag => this.UIUtils.flags[flag]);
   }
 
   joinPosition (id, guild) {
