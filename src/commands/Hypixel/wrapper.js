@@ -1,11 +1,12 @@
 const { Command } = require('discord-akairo');
 const { Message, MessageEmbed } = require('discord.js');
 const hypixel = require('../../Hypixel');
-const { methodAlias } = require('../../constants.json');
+const { methodAlias } = require('../../constants');
+const { MessageAttachment } = require('discord.js');
 class WrapperCommand extends Command {
   constructor () {
     super('wrapper', {
-      aliases: ['w'],
+      aliases: ['w', 'wrapper'],
       description: 'Return programatically parsed results from the API',
       cooldown: 15000,
       ratelimit: 2,
@@ -35,7 +36,12 @@ class WrapperCommand extends Command {
      * @param {{method:string, args:string, noParse:boolean}} args
      */
   async exec (message, args) {
-    if (!args.method) return message.channel.send('I need to know which method to call.');
+    if (!args.method) {
+      const embed = new MessageEmbed()
+        .setColor(this.client.color)
+        .setDescription(`I need to know which method to call.\n\nList of methods:\n${Object.keys(methodAlias).map(ma => `${ma} => \`${methodAlias[ma]}\``).join('\n')}\n\nUsage: \`${this.handler.prefix}${this.id} player StavZDev\``);
+      return message.channel.send(embed);
+    }
     args.args = args.args.split(/ +/);
     if (args.args.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
     args.args.shift();
@@ -43,7 +49,8 @@ class WrapperCommand extends Command {
       return message.channel.send(`Error occurred: \`${e}\``);
     });
     if (args.noParse) {
-      return message.channel.send('API Result : ', { files: [JSON.stringify(result)] });
+      const attachment = new MessageAttachment(Buffer.from(JSON.stringify(result, null, 4)), 'result.json');
+      return message.channel.send('API Result : ', { files: [attachment] });
     }
     return message.channel.send(new MessageEmbed()
       .addFields(this.format(result))
