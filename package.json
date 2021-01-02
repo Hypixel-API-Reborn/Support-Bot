@@ -31,7 +31,7 @@
     "discord.js": "^12.5.1",
     "discord.js-docs": "^0.1.2",
     "dotenv": "^8.2.0",
-    "hypixel-api-reborn": "^4.1.1",
+    "hypixel-api-reborn": "^4.1.2",
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
     "mongoose": "^5.11.8",
