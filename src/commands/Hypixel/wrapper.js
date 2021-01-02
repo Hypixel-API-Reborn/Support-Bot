@@ -46,19 +46,21 @@ class WrapperCommand extends Command {
     if (args.args.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
     args.args.shift();
     const result = await hypixel[args.method](...args.args).catch(e => {
-      return message.channel.send(`Error occurred: \`${e}\``);
+      message.channel.send(`Error occurred: \`${e}\``);
     });
-    if (args.noParse) {
+    if (args.noParse && result) {
       const attachment = new MessageAttachment(Buffer.from(JSON.stringify(result, null, 4)), 'result.json');
       return message.channel.send('API Result : ', { files: [attachment] });
     }
-    return message.channel.send(new MessageEmbed()
-      .addFields(this.format(result))
-      .addField('\u200B', 'More results might be hidden')
-      .setColor(this.client.color)
-      .setTitle(args.method)
-      .setTimestamp()
-    );
+    if (result) {
+      return message.channel.send(new MessageEmbed()
+        .addFields(this.format(result))
+        .addField('\u200B', 'More results might be hidden')
+        .setColor(this.client.color)
+        .setTitle(args.method)
+        .setTimestamp()
+      );
+    }
   }
 
   /**
@@ -69,7 +71,7 @@ class WrapperCommand extends Command {
     if (Array.isArray(result)) return this.format(result[0]);
     if (typeof result === 'object') {
       const obj = Object.getOwnPropertyNames(result).reduce((a, b) => {
-        if (Array.isArray(result[b])) a[b] = result[b].join(', ');
+        if (Array.isArray(result[b])) a[b] = result[b].join(', ') || '[ ]';
         else a[b] = typeof result[b] === 'object' ? JSON.stringify(result[b]) : result[b];
         return a;
       }, {});
