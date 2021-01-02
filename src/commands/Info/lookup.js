@@ -126,7 +126,7 @@ class LookupCommand extends Command {
 
   getMemberRoles (member, guildId) {
     const first = member.roles.cache.size - 1;
-    let roles = member.roles.cache.filter(r => r.id !== guildId).map(r => r);
+    let roles = member.roles.cache.filter(r => r.id !== guildId).map(r => r).sort((b, a) => a.position - b.position);
     if (!roles.length) {
       return {
         size: 0,
