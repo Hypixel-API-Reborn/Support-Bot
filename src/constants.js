@@ -7,15 +7,33 @@ module.exports = {
         lb: 'getLeaderboards',
         online: 'getOnline',
         ping: 'getPing',
-        recentGames: 'getRecentGames',
+        recentgames: 'getRecentGames',
         status: 'getStatus',
         watchdog: 'getWatchdogStats',
         player: 'getPlayer',
         guild: 'getGuild',
         friend: 'getFriends',
-        playerAuctions: 'getSkyblockAuctionsByPlayer',
+        playerauctions: 'getSkyblockAuctionsByPlayer',
         sbmember: 'getSkyblockMember',
         sbprofile: 'getSkyblockProfiles',
         sbbazaar: 'getSkyblockBazaar'
-    }
+    },
+    minigames: [
+        {
+            name: 'skywars',
+            aliases: ['sw', 'skywars']
+        },
+        {
+            name: 'bedwars',
+            aliases: ['bw', 'bedwars']
+        },
+        {
+            name: 'duels',
+            aliases: ['duels']
+        },
+        {
+            name: 'murdermystery',
+            aliases: ['murder', 'mm', 'murdermystery']
+        }
+    ]
 };
