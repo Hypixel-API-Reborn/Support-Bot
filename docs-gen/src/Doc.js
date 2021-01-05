@@ -10,9 +10,6 @@ const DocInterface = require('./DocInterface')
 
 const docCache = new Map()
 
-const DJS = 'discordjs'
-const AKAIRO = 'discord-akairo'
-
 function dissectURL (url) {
   const parts = url.slice(34).split('/')
   return [parts[0], parts[1], parts[3].slice(0, -5)]
@@ -46,30 +43,21 @@ class Doc extends DocBase {
   }
 
   get baseURL () {
-    switch (this.project) {
-      case DJS: return 'https://discord.js.org'
-      case AKAIRO: return 'https://discord-akairo.github.io'
-      default: return null
-    }
+    return 'https://hypixel.stavzdev.xyz';
   }
 
   get baseDocsURL () {
     if (!this.baseURL) return null
-    const repo = ['discord.js', AKAIRO].includes(this.repo) ? 'main' : this.repo
-    return `${this.baseURL}/#/docs/${repo}/${this.branch}`
+    return `${this.baseURL}/#/docs/main/${this.branch}`
   }
 
   get icon () {
     if (!this.baseURL) return null
-    return `${this.baseURL}/static/favicon.ico`
+    return `${this.baseURL}/static/favicon.png`
   }
 
   get color () {
-    switch (this.project) {
-      case DJS: return 0x2296f3
-      case AKAIRO: return 0x87202f
-      default: return null
-    }
+    return 0xff8c00;
   }
 
   get (...terms) {
@@ -114,7 +102,7 @@ class Doc extends DocBase {
     if (!searchResults) return null
     const embed = this.baseEmbed();
     embed.title = 'Search results:'
-    embed.description = searchResults.map(el => `**${el.link.replace('null', `https://github.com/${this.project}/${this.repo}/blob/${this.branch}/${el.meta.path}/${el.meta.file}#L${el.meta.line}`)}**`).join('\n')
+    embed.description = searchResults.map(el => `**${el.link}**`).join('\n')
     return embed
   }
 
@@ -145,20 +133,14 @@ class Doc extends DocBase {
   }
 
   baseEmbed () {
-    const title = {
-      'discord.js': 'Discord.js Docs',
-      'discord.js-commando': 'Commando Docs',
-      'discord-rpc': 'RPC Docs',
-      'discord-akairo': 'Akairo Docs',
-      'collection': 'Collection'
-    }[this.repo] || this.repo
+    const title = 'Hypixel API • Reborn';
 
     return {
       color: this.color,
       author: {
         name: `${title} (${this.branch})`,
         url: this.baseDocsURL,
-        icon_url: this.icon
+        icon_url: null
       }
     }
   }
@@ -186,19 +168,18 @@ class Doc extends DocBase {
   static getRepoURL (id) {
     const [name, branch] = id.split('/')
     const project = {
-      main: 'discord.js',
-      commando: 'Commando',
-      rpc: 'RPC'
+      main: 'hypixel-api-reborn',
+      bot: 'our-awesome-bot'
     }[name]
 
-    return `https://github.com/discordjs/${project}/blob/${branch}/`
+    return `https://github.com/Hypixel-API-reborn/${project}/blob/${branch}/`
   }
 
   static sources () {
     return sources
   }
 
-  static async fetch (sourceName, { force } = {}) {
+  static async fetch (sourceName = 'master', { force } = {}) {
     const url = sources[sourceName] || sourceName
     if (!force && docCache.has(url)) return docCache.get(url)
 

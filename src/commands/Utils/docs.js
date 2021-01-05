@@ -26,10 +26,10 @@ class DocsCommand extends Command {
     if (!args.query) {
       const embed = new MessageEmbed()
         .setColor(this.client.color)
-        .setDescription(':eyes: We have a documentation website - [click here](http://hypixel-api-reborn.stavzdev.xyz/)');
+        .setDescription(':eyes: Hypixel API • Reborn documentation is [here](https://hypixel.stavzdev.xyz/).');
       return message.channel.send(embed);
     }
-    message.channel.send({ embed: Object.assign(docs.resolveEmbed(args.query), { color: this.client.color, author: { name: 'Hypixel API • Reborn', url: 'https://hypixel-api-reborn.stavzdev.xyz', icon_url: null } }) });
+    message.channel.send({ embed: docs.resolveEmbed(args.query) });
   }
 }
 module.exports = DocsCommand;
