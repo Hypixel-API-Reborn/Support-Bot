@@ -34,7 +34,7 @@ class VerifyCommand extends Command {
       const start = new MessageEmbed()
         .setColor(this.client.color)
         .setDescription(`Specify your nickname for verification. e.g. \`${this.handler.prefix}${this.id} StavZDev\`\n\n**You need connected Discord as social media on Hypixel Network.**`);
-      message.channel.send(start);
+      return message.channel.send(start);
     }
     hypixel.getPlayer(args.nickname).then(async player => {
       if (!player.socialMedia.find(s => s.id === 'DISCORD')) return message.reply('You haven\'t connected Discord to Hypixel Network.');
