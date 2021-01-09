@@ -27,9 +27,11 @@
   },
   "dependencies": {
     "chalk": "^4.1.0",
+    "common-tags": "^1.8.0",
     "discord-akairo": "git+https://github.com/discord-akairo/discord-akairo.git",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
+    "fuse.js": "^6.4.6",
     "hypixel-api-reborn": "^5.0.4",
     "moment": "^2.29.1",
     "moment-duration-format": "^2.3.2",
