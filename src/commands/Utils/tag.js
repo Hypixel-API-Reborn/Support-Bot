@@ -6,7 +6,13 @@ class TagCommand extends Command {
   constructor () {
     super('tag', {
       aliases: ['tag'],
-      description: 'Tags',
+      description: {
+        content: 'Tags',
+        usage: 'tag [tag]',
+        examples: [
+          'tag links'
+        ]
+      },
       args: [
         {
           id: 'content',

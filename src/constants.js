@@ -29,7 +29,7 @@ module.exports = {
         },
         {
             name: 'duels',
-            aliases: ['duels']
+            aliases: ['duels', 'duel']
         },
         {
             name: 'murdermystery',

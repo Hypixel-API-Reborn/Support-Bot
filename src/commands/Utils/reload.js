@@ -5,6 +5,14 @@ class ReloadCommand extends Command {
   constructor () {
     super('reload', {
       aliases: ['reload', 'r'],
+      description: {
+        content: 'Command reloader',
+        usage: 'reload [command] [-a]',
+        examples: [
+          'reload -a',
+          'reload player'
+        ]
+      },
       ownerOnly: true,
       args: [
         {

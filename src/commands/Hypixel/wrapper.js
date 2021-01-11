@@ -6,10 +6,17 @@ const { MessageAttachment } = require('discord.js');
 class WrapperCommand extends Command {
   constructor () {
     super('wrapper', {
-      aliases: ['w', 'wrapper'],
-      description: 'Return programatically parsed results from the API',
+      aliases: ['wrapper', 'w'],
+      description: {
+        content: 'Return programatically parsed results from the API',
+        usage: 'wrapper [endpoint] [args]',
+        examples: [
+          'w player StavZDev',
+          'w online',
+          'w guild player Sk1er'
+        ]
+      },
       cooldown: 15000,
-      ratelimit: 2,
       args: [
         {
           id: 'method',
@@ -31,10 +38,10 @@ class WrapperCommand extends Command {
   }
 
   /**
-     *
-     * @param {Message} message
-     * @param {{method:string, args:string, noParse:boolean}} args
-     */
+   *
+   * @param {Message} message
+   * @param {{method:string, args:string, noParse:boolean}} args
+   */
   async exec (message, args) {
     if (!args.method) {
       const embed = new MessageEmbed()

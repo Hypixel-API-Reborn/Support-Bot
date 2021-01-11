@@ -8,8 +8,16 @@ class VerifyCommand extends Command {
   constructor () {
     super('verify', {
       aliases: ['verify'],
-      description: 'Connect your hypixel account to discord.',
+      description: {
+        content: 'Connect your hypixel account to discord.',
+        usage: 'verify [nickname]',
+        examples: [
+          'verify StavZDev',
+          'verify lifelong'
+        ]
+      },
       channel: 'guild',
+      cooldown: 10000,
       args: [
         {
           id: 'nickname',

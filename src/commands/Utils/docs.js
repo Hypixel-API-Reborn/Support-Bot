@@ -5,7 +5,15 @@ const fetch = require('node-fetch');
 class DocsCommand extends Command {
   constructor () {
     super('docs', {
-      description: 'Searches Hypixel API • Reborn docs for your query',
+      description: {
+        content: 'Searches Hypixel API • Reborn docs for your query',
+        usage: 'docs [query]',
+        examples: [
+          'docs Client',
+          'docs Client#getPlayer',
+          'docs Client.getGuild'
+        ]
+      },
       aliases: ['docs'],
       args: [
         {

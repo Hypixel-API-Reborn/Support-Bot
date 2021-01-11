@@ -5,7 +5,13 @@ class PingCommand extends Command {
   constructor () {
     super('ping', {
       aliases: ['ping', 'latency'],
-      description: 'Shows bot\'s latency'
+      description: {
+        content: 'Shows bot\'s latency',
+        usage: 'ping',
+        examples: [
+          'ping'
+        ]
+      }
     });
   }
 

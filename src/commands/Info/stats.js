@@ -8,7 +8,13 @@ class StatsCommand extends Akairo.Command {
   constructor () {
     super('stats', {
       aliases: ['stats'],
-      description: 'Shows bot\'s and Hypixel API • Reborn stats'
+      description: {
+        content: 'Shows bot\'s and Hypixel API • Reborn stats',
+        usage: 'stats',
+        examples: [
+          'stats'
+        ]
+      }
     });
   }
 

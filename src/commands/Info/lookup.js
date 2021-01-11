@@ -7,7 +7,15 @@ class LookupCommand extends Command {
   constructor () {
     super('lookup', {
       aliases: ['lookup', 'user', 'userinfo'],
-      description: 'Shows information about you or specified user.',
+      description: {
+        content: 'Shows information about you or specified user.',
+        usage: 'lookup [@User] [-c]',
+        examples: [
+          'lookup @StavZDev -c',
+          'lookup User',
+          'lookup 291568379423096832'
+        ]
+      },
       channel: 'guild',
       args: [
         {
