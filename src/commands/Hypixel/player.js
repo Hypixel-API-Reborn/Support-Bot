@@ -163,7 +163,7 @@ class PlayerCommand extends Command {
     const stats = player.stats.bedwars;
     function generateStats (mode) {
       if (!mode) {
-        return `Coins: \`${stats.coins.toLocaleString()}\`\nPrestige: \`${stats.prestige}\`\nKills: \`${stats.kills.toLocaleString()}\`\nDeaths: \`${stats.deaths.toLocaleString()}\`\nWins: \`${stats.wins.toLocaleString()}\`\nLosses: \`${stats.losses.toLocaleString()}\`\nKill/Death ratio: \`${stats.KDRatio}\`\nWin/Loss ratio: \`${stats.WLRatio}\``;
+        return `Coins: \`${stats.coins.toLocaleString()}\`\nPrestige: \`${stats.prestige}\`\nKills: \`${stats.kills.toLocaleString()}\`\nDeaths: \`${stats.deaths.toLocaleString()}\`\nWins: \`${stats.wins.toLocaleString()}\`\nLosses: \`${stats.losses.toLocaleString()}\`\nKill/Death ratio: \`${stats.KDRatio}\`\nWin/Loss ratio: \`${stats.WLRatio}\`\nFinal Kill/Death ratio: \`${stats.finalKDRatio}\``;
       }
       return `Kills: \`${stats[mode].kills.toLocaleString()}\`\nDeaths: \`${stats[mode].deaths.toLocaleString()}\`\nWins: \`${stats[mode].wins.toLocaleString()}\`\nLosses: \`${stats[mode].losses.toLocaleString()}\`\nKill/Death ratio: \`${stats[mode].KDRatio}\`\nWin/Loss ratio: \`${stats[mode].WLRatio}\`\nPlayed games: \`${stats[mode].playedGames}\``;
     }
