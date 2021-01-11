@@ -165,7 +165,7 @@ class PlayerCommand extends Command {
       if (!mode) {
         return `Coins: \`${stats.coins.toLocaleString()}\`\nPrestige: \`${stats.prestige}\`\nKills: \`${stats.kills.toLocaleString()}\`\nDeaths: \`${stats.deaths.toLocaleString()}\`\nWins: \`${stats.wins.toLocaleString()}\`\nLosses: \`${stats.losses.toLocaleString()}\`\nKill/Death ratio: \`${stats.KDRatio}\`\nWin/Loss ratio: \`${stats.WLRatio}\`\nFinal Kill/Death ratio: \`${stats.finalKDRatio}\``;
       }
-      return `Kills: \`${stats[mode].kills.toLocaleString()}\`\nDeaths: \`${stats[mode].deaths.toLocaleString()}\`\nWins: \`${stats[mode].wins.toLocaleString()}\`\nLosses: \`${stats[mode].losses.toLocaleString()}\`\nKill/Death ratio: \`${stats[mode].KDRatio}\`\nWin/Loss ratio: \`${stats[mode].WLRatio}\`\nFinal Kill/Death ratio: \`${stats[mode].finalKDRatio}\`\nPlayed games: \`${stats[mode].playedGames}\``;
+      return `Kills: \`${stats[mode].kills.toLocaleString()}\`\nDeaths: \`${stats[mode].deaths.toLocaleString()}\`\nWins: \`${stats[mode].wins.toLocaleString()}\`\nLosses: \`${stats[mode].losses.toLocaleString()}\`\nKill/Death ratio: \`${stats[mode].KDRatio}\`\nWin/Loss ratio: \`${stats[mode].WLRatio}\`\nPlayed games: \`${stats[mode].playedGames}\`\nFinal Kill/Death ratio: \`${stats[mode].finalKDRatio}\``;
     }
     const embed = new MessageEmbed()
       .setColor(this.client.color)
@@ -256,7 +256,7 @@ class PlayerCommand extends Command {
       .setColor(this.client.color)
       .setThumbnail(`https://visage.surgeplay.com/face/64/${player.uuid}`)
       .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname} | Murder Mystery`, this.utils.rankColors[player.rank === 'MVP++' ? player.rank : player.rank.replace(/\+/g, '')], `https://plancke.io/hypixel/player/stats/${player.nickname}#${this.duels.name}`)
-      .addField('Overall', `Kills: \`${stats.kills.toLocaleString()}\`\nDeaths: \`${stats.deaths.toLocaleString()}\`\nWins: \`${stats.wins.toLocaleString()}\`\nKill/Death ratio: \`${stats.KDRatio}\`\nWin as Detective: ${stats.winsAsMurderer.toLocaleString()}\nPlayed games: \`${stats.playedGames}\``, true)
+      .addField('Overall', `Kills: \`${stats.kills.toLocaleString()}\`\nDeaths: \`${stats.deaths.toLocaleString()}\`\nWins: \`${stats.wins.toLocaleString()}\`\nKill/Death ratio: \`${stats.KDRatio}\`\nWin as Murderer: \`${stats.winsAsMurderer.toLocaleString()}\nWin as Detective: \`${stats.winsAsDetective.toLocaleString()}\`\nPlayed games: \`${stats.playedGames}\``, true)
       .addField('Double Up', `Kills: \`${stats.doubleUp.kills.toLocaleString()}\`\nDeaths: \`${stats.doubleUp.deaths.toLocaleString()}\`\nWins: \`${stats.doubleUp.wins.toLocaleString()}\`\nKill/Death ratio: \`${stats.doubleUp.KDRatio}\`\nPlayed games: \`${stats.doubleUp.playedGames}\``, true)
       .addField('Infection', `Kills: \`${stats.infection.kills.toLocaleString()}\`\nDeaths: \`${stats.infection.deaths.toLocaleString()}\`\nWins: \`${stats.infection.wins.toLocaleString()}\`\nKill/Death ratio: \`${stats.infection.KDRatio}\`\nPlayed games: \`${stats.infection.playedGames}\``, true);
     message.channel.send(murdermystery);
