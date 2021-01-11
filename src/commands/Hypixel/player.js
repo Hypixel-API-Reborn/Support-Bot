@@ -114,6 +114,8 @@ class PlayerCommand extends Command {
         embed.addField('Last Login', `\`${moment(player.lastLoginTimestamp).fromNow()}\``);
       }
       message.channel.send(embed);
+    }).catch(e => {
+      return message.reply(`Error: \`${e}\``);
     });
   }
 
