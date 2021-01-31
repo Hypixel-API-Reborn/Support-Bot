@@ -86,7 +86,7 @@ class Doc extends DocBase {
     const filtered = []
 
     while (result.length > 0 && filtered.length < 10) {
-      const element = this.get(...result.shift().split('#'))
+      const element = this.get(...result.shift().item.id.split('#'))
       if (excludePrivateElements && element.access === 'private') continue
       filtered.push(element)
     }
