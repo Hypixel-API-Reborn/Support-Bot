@@ -16,7 +16,8 @@ module.exports = {
         playerauctions: 'getSkyblockAuctionsByPlayer',
         sbmember: 'getSkyblockMember',
         sbprofile: 'getSkyblockProfiles',
-        sbbazaar: 'getSkyblockBazaar'
+        sbbazaar: 'getSkyblockBazaar',
+        sbnews: 'getSkyblockNews'
     },
     minigames: [
         {
