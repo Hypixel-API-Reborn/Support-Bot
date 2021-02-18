@@ -52,15 +52,16 @@ class WrapperCommand extends Command {
     }
     args.args = args.args.split(/ +/);
     const gte = (args.args.indexOf('>') + 1 || args.args.length) - 1;
-    const query = args.args.slice(0,gte);
+    const query = args.args.slice(0, gte);
     const path = args.args.slice(gte).join('').slice(1).split('>').filter((x) => x !== '');
     if (query.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
     query.shift();
     let result = await hypixel[args.method](...query).catch(e => {
       message.channel.send(`Error occurred: \`${e}\``);
     });
-    path.forEach((element) => result = result ? result[element] : undefined );
-    if (!result) return message.channel.send('API Result is undefined. Maybe it is due to an invalid path or simply because the result is undefined.')
+    // eslint-disable-next-line no-return-assign
+    path.forEach((element) => result = result ? result[element] : undefined);
+    if (result === undefined) return message.channel.send('API Result is undefined. Maybe it is due to an invalid path or simply because the result is undefined.');
     if (args.noParse && result) {
       const attachment = new MessageAttachment(Buffer.from(JSON.stringify(result, null, 4)), 'result.json');
       return message.channel.send('API Result : ', { files: [attachment] });
