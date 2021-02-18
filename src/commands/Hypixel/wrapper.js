@@ -13,7 +13,8 @@ class WrapperCommand extends Command {
         examples: [
           'w player StavZDev',
           'w online',
-          'w guild player Sk1er'
+          'w guild player Sk1er',
+          'w player StavZDev > uuid'
         ]
       },
       cooldown: 15000,
@@ -50,24 +51,27 @@ class WrapperCommand extends Command {
       return message.channel.send(embed);
     }
     args.args = args.args.split(/ +/);
-    if (args.args.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
-    args.args.shift();
-    const result = await hypixel[args.method](...args.args).catch(e => {
+    const gte = (args.args.indexOf('>') + 1 || args.args.length) - 1;
+    const query = args.args.slice(0,gte);
+    const path = args.args.slice(gte).join(' ').slice(1).split('>').filter((x) => x !== '');
+    if (query.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
+    query.shift();
+    let result = await hypixel[args.method](...query).catch(e => {
       message.channel.send(`Error occurred: \`${e}\``);
     });
+    path.forEach((element) => result ? result[element] : undefined );
+    if (!result) return message.channel.send('API Result is undefined. Maybe it is due to an invalid path or simply because the result is undefined.')
     if (args.noParse && result) {
       const attachment = new MessageAttachment(Buffer.from(JSON.stringify(result, null, 4)), 'result.json');
       return message.channel.send('API Result : ', { files: [attachment] });
     }
-    if (result) {
-      return message.channel.send(new MessageEmbed()
-        .addFields(this.format(result))
-        .addField('\u200B', 'More results might be hidden')
-        .setColor(this.client.color)
-        .setTitle(args.method)
-        .setTimestamp()
-      );
-    }
+    return message.channel.send(new MessageEmbed()
+      .addFields(this.format(result))
+      .addField('\u200B', 'More results might be hidden')
+      .setColor(this.client.color)
+      .setTitle(args.method)
+      .setTimestamp()
+    );
   }
 
   /**
