@@ -12,7 +12,7 @@ class ReadyListener extends Listener {
     this.client.lastReload = Date.now();
     const guild = await this.client.guilds.fetch('660416184252104705', true, true);
     const members = await guild.members.fetch({ force: true });
-    members.forEach(async m => await m.loadCache());
+    members.forEach(async (m) => await m.loadCache());
     this.client.user.setActivity({ name: '!help', type: 'LISTENING' });
   }
 }

@@ -29,7 +29,7 @@ class DocsCommand extends Command {
    * @param {{query: string[]}} args
    */
   async exec (message, args) {
-    const master = await fetch('https://raw.githubusercontent.com/hypixel-api-reborn/hypixel-api-reborn/docs/master.json').then(r => r.json());
+    const master = await fetch('https://raw.githubusercontent.com/hypixel-api-reborn/hypixel-api-reborn/docs/master.json').then((r) => r.json());
     const docs = new (require('../../../docs-gen'))('https://raw.githubusercontent.com/hypixel-api-reborn/hypixel-api-reborn/docs/master.json', master);
     if (!args.query) {
       const embed = new MessageEmbed()

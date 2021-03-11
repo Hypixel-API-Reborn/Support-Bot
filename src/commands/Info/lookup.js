@@ -22,7 +22,7 @@ class LookupCommand extends Command {
           id: 'member',
           match: 'content',
           type: 'member',
-          default: message => message.member
+          default: (message) => message.member
         },
         {
           id: 'compact',
@@ -101,7 +101,7 @@ class LookupCommand extends Command {
       .setDescription([`**${args.member.user.tag}**`, `\n${args.member.presence.activities[0] ? `${statusEmoji} ${statusType === 'CUSTOM_STATUS' ? '' : status_types[args.member.presence.activities[0].type]}  ${statusType === 'CUSTOM_STATUS' ? args.member.presence.activities[0].state == null ? `**${statusName}**` : `**${args.member.presence.activities[0].state}**` : args.member.presence.activities[0].type === 'LISTENING' && args.member.presence.activities[0].syncID ? `**[${args.member.presence.activities[0].details}](https://open.spotify.com/track/${args.member.presence.activities[0].syncID})** by **${args.member.presence.activities[0].state}**` : `**${args.member.presence.activities[0].name}**`}` : `${statusEmoji} **${statusName}**`}`]);
     if (activities.length && activities.length > 1) {
       activities.splice(0, 1);
-      embed.addField('Activities', `${activities.map(a => `• ${a.type === 'CUSTOM_STATUS' ? '' : status_types[a.type]} ${a.type === 'CUSTOM_STATUS' && a.state === null ? '' : a.type === 'LISTENING' && a.syncID ? `**${`[${a.details}](https://open.spotify.com/track/${a.syncID})`}** by **${a.state}**` : a.type === 'CUSTOM_STATUS' ? `**${a.state}**` : `**${a.name}**`}`).join('\n')}`);
+      embed.addField('Activities', `${activities.map((a) => `• ${a.type === 'CUSTOM_STATUS' ? '' : status_types[a.type]} ${a.type === 'CUSTOM_STATUS' && a.state === null ? '' : a.type === 'LISTENING' && a.syncID ? `**${`[${a.details}](https://open.spotify.com/track/${a.syncID})`}** by **${a.state}**` : a.type === 'CUSTOM_STATUS' ? `**${a.state}**` : `**${a.name}**`}`).join('\n')}`);
     }
     embed.addField('Join Position', this.joinPosition(args.member.id, message.guild), true)
       .addField('\u200B', '\u200B', true)
@@ -134,7 +134,7 @@ class LookupCommand extends Command {
 
   getMemberRoles (member, guildId) {
     const first = member.roles.cache.size - 1;
-    let roles = member.roles.cache.filter(r => r.id !== guildId).map(r => r).sort((b, a) => a.position - b.position);
+    let roles = member.roles.cache.filter((r) => r.id !== guildId).map((r) => r).sort((b, a) => a.position - b.position);
     if (!roles.length) {
       return {
         size: 0,
@@ -158,7 +158,7 @@ class LookupCommand extends Command {
 
   getUserFlags (member) {
     if (!member.flags.bitfield) return null;
-    return member.flags.toArray().map(flag => this.UIUtils.flags[flag]);
+    return member.flags.toArray().map((flag) => this.UIUtils.flags[flag]);
   }
 
   joinPosition (id, guild) {

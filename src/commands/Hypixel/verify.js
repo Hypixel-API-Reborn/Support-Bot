@@ -44,9 +44,9 @@ class VerifyCommand extends Command {
         .setDescription(`Specify your nickname for verification. e.g. \`${this.handler.prefix}${this.id} StavZDev\`\n\n**You need connected Discord as social media on Hypixel Network.**`);
       return message.channel.send(start);
     }
-    hypixel.getPlayer(args.nickname).then(async player => {
-      if (!player.socialMedia.find(s => s.id === 'DISCORD')) return message.reply('You haven\'t connected Discord to Hypixel Network.');
-      if (player.socialMedia.find(s => s.id === 'DISCORD').link !== message.author.tag) return message.reply('Connected Discord tag doesn\'t match your Discord tag.');
+    hypixel.getPlayer(args.nickname).then(async (player) => {
+      if (!player.socialMedia.find((s) => s.id === 'DISCORD')) return message.reply('You haven\'t connected Discord to Hypixel Network.');
+      if (player.socialMedia.find((s) => s.id === 'DISCORD').link !== message.author.tag) return message.reply('Connected Discord tag doesn\'t match your Discord tag.');
       const user1 = await User.findOne({ uuid: player.uuid });
       if (user1) return message.reply('This account already connected to another.');
       new User({
@@ -55,7 +55,7 @@ class VerifyCommand extends Command {
       }).save(() => {
         message.reply(`Player \`${player.nickname}\` connected to your account.`);
       });
-    }).catch(e => {
+    }).catch((e) => {
       if (e.message === Errors.PLAYER_DOES_NOT_EXIST) {
         message.reply(`Player \`${args.nickname}\` does not exist.`);
       } else {

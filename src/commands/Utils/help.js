@@ -32,7 +32,7 @@ class HelpCommand extends Command {
       .setColor(this.client.color);
     if (!args.command) {
       for (const category of this.handler.categories.values()) {
-        if (category.id) list.addField(`• ${category.id}`, `${category.filter(cmd => !cmd.ownerOnly).map(cmd => `\`${cmd.aliases[0]}\``).join(', ')}`);
+        if (category.id) list.addField(`• ${category.id}`, `${category.filter((cmd) => !cmd.ownerOnly).map((cmd) => `\`${cmd.aliases[0]}\``).join(', ')}`);
       }
       return message.channel.send(list);
     }
@@ -44,7 +44,7 @@ class HelpCommand extends Command {
     if (args.command.description) {
       command.addField('Description', `${args.command.description ? args.command.description.content : 'None'}`)
         .addField('Usage', `\`${this.handler.prefix}${args.command.description.usage}\``)
-        .addField('Examples', `${args.command.description.examples.map(e => `\`${this.handler.prefix}${e}\``).join('\n')}`);
+        .addField('Examples', `${args.command.description.examples.map((e) => `\`${this.handler.prefix}${e}\``).join('\n')}`);
     }
     message.channel.send(command);
   }

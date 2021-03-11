@@ -1,7 +1,6 @@
 const { Command } = require('discord-akairo');
 const { Message, MessageEmbed } = require('discord.js');
 const hypixel = require('../../Hypixel');
-const { methodAlias } = require('../../constants');
 const { MessageAttachment } = require('discord.js');
 class WrapperCommand extends Command {
   constructor () {
@@ -22,6 +21,9 @@ class WrapperCommand extends Command {
         {
           id: 'method',
           type: (message, phrase) => {
+            // eslint-disable-next-line prefer-const
+            // eslint-disable-next-line no-var
+            var { methodAlias } = this.client.utils.constants;
             return methodAlias[phrase.toLowerCase()];
           }
         },
@@ -44,10 +46,11 @@ class WrapperCommand extends Command {
    * @param {{method:string, args:string, noParse:boolean}} args
    */
   async exec (message, args) {
+    const { methodAlias } = this.client.utils.constants;
     if (!args.method) {
       const embed = new MessageEmbed()
         .setColor(this.client.color)
-        .setDescription(`I need to know which method to call.\n\nList of methods:\n${Object.keys(methodAlias).map(ma => `${ma} => \`${methodAlias[ma]}\``).join('\n')}\n\nUsage: \`${this.handler.prefix}${this.id} player StavZDev\``);
+        .setDescription(`I need to know which method to call.\n\nList of methods:\n${Object.keys(methodAlias).map((ma) => `${ma} => \`${methodAlias[ma]}\``).join('\n')}\n\nUsage: \`${this.handler.prefix}${this.id} player StavZDev\``);
       return message.channel.send(embed);
     }
     args.args = args.args.split(/ +/);
@@ -56,7 +59,7 @@ class WrapperCommand extends Command {
     const path = args.args.slice(gte).join('').slice(1).split('>').filter((x) => x !== '');
     if (query.length > 2 && args.method !== 'getGuild') return message.channel.send('Too many arguments. Only 1 is allowed, except for getGuild');
     query.shift();
-    let result = await hypixel[args.method](...query).catch(e => {
+    let result = await hypixel[args.method](...query).catch((e) => {
       message.channel.send(`Error occurred: \`${e}\``);
     });
     // eslint-disable-next-line no-return-assign
@@ -88,7 +91,7 @@ class WrapperCommand extends Command {
         else a[b] = typeof result[b] === 'object' ? JSON.stringify(result[b]) : result[b];
         return a;
       }, {});
-      return Object.keys(obj).map(x => ({ name: x, value: obj[x].toString().length > 1024 ? obj[x].toString().slice(0, 1024) : obj[x].toString() })).slice(0, 24);
+      return Object.keys(obj).map((x) => ({ name: x, value: obj[x].toString().length > 1024 ? obj[x].toString().slice(0, 1024) : obj[x].toString() })).slice(0, 24);
     }
     return [{ name: 'Response', value: String(result) }];
   }

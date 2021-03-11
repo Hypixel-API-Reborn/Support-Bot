@@ -2,6 +2,7 @@ const { AkairoClient, CommandHandler, ListenerHandler } = require('discord-akair
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const EmbedPagesRenderer = require('./EmbedPagesRenderer');
+const User = require('../models/User');
 require('../prototypes/String');
 require('../discord/GuildMember');
 class Client extends AkairoClient {
@@ -10,17 +11,24 @@ class Client extends AkairoClient {
     this.config = dotenv.config().parsed;
     this.utils = new (require('./Utils'))();
     this.logger = new (require('./Logger'))();
-    this.commandHandler = new CommandHandler(this, { directory: './src/commands', prefix: '!', automateCategories: true, defaultCooldown: 5000, commandUtil: true, ignoreCooldown: '291568379423096832' });
+    this.commandHandler = new CommandHandler(this, { directory: './src/commands', prefix: process.env.NODE_ENV === 'production' ? '?' : '!', automateCategories: true, defaultCooldown: 5000, commandUtil: true, ignoreCooldown: '291568379423096832' });
     this.listenerHandler = new ListenerHandler(this, { directory: './src/events', automateCategories: true });
     this.embedPages = new EmbedPagesRenderer(this);
     this.color = '#ff8c00';
     this.lastReload = null;
   }
 
+  async getUser(message, args) {
+    const user = await User.findOne({ id: message.author.id });
+    if (!user && !args.player) return null;
+    if (user && !args.player) return user.uuid;
+    return args.player;
+  }
+
   async run () {
     mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
       this.logger.info('Successfully connected to MongoDB!');
-    }).catch(e => {
+    }).catch((e) => {
       this.logger.error('Something went wrong while connecting to MongoDB.');
       this.logger.error(e);
     });
@@ -29,7 +37,7 @@ class Client extends AkairoClient {
     this.listenerHandler.loadAll();
     this.login(process.env.DISCORD_TOKEN).then(() => {
       this.logger.info('Successfully connected to Discord! ' + this.user.tag + ' ready to work!');
-    }).catch(e => {
+    }).catch((e) => {
       this.logger.error('Something went wrong while connecting to Discord.');
       this.logger.error(e);
     });

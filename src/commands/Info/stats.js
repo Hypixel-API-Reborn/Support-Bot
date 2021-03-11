@@ -23,12 +23,12 @@ class StatsCommand extends Akairo.Command {
    * @param {Message} message
    */
   async exec (message) {
-    const downloadsFetch = await fetch('https://api.npmjs.org/downloads/range/2013-08-21:2100-08-21/hypixel-api-reborn').then(r => r.json());
-    var downloads = 0;
+    const downloadsFetch = await fetch('https://api.npmjs.org/downloads/range/2013-08-21:2100-08-21/hypixel-api-reborn').then((r) => r.json());
+    let downloads = 0;
     for (const item of downloadsFetch.downloads) downloads += item.downloads;
-    const starsFetch = await fetch('https://api.github.com/repos/hypixel-api-reborn/hypixel-api-reborn').then(r => r.json());
+    const starsFetch = await fetch('https://api.github.com/repos/hypixel-api-reborn/hypixel-api-reborn').then((r) => r.json());
     const stars = starsFetch.stargazers_count;
-    const contributorsFetch = await fetch('https://api.github.com/repos/hypixel-api-reborn/hypixel-api-reborn/stats/contributors').then(r => r.json());
+    const contributorsFetch = await fetch('https://api.github.com/repos/hypixel-api-reborn/hypixel-api-reborn/stats/contributors').then((r) => r.json());
     const contributors = contributorsFetch.length;
     const akairoVersion = Akairo.version;
     const embed = new MessageEmbed()

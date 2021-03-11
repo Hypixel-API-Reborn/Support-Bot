@@ -1,5 +1,4 @@
 const { Message, MessageEmbed } = require('discord.js');
-const { Utils } = require('hypixel-api-reborn');
 class EmbedPagesRenderer {
   constructor (client) {
     this.client = client;
@@ -20,16 +19,16 @@ class EmbedPagesRenderer {
       embed = new MessageEmbed(pages[page]).setFooter(`Page ${page + 1} of ${pages.length}`);
     }
     message.channel.send(embed).then((msg) => {
-      msg.react('⬅️').then(r => {
+      msg.react('⬅️').then((r) => {
         msg.react('➡️');
         const emojis = ['⬅️', '➡️'];
         const collector = msg.createReactionCollector((r, u) => emojis.includes(r.emoji.name) && u.id === message.author.id, { time: 60000 });
         collector.on('collect', (r) => {
           let e;
           switch (r.emoji.name) {
-            case emojis[0]: { page = page > 0 ? --page : pages.length - 1; e = emojis[0]; break; }
-            case emojis[1]: { page = page + 1 < pages.length ? ++page : 0; e = emojis[1]; break; }
-            default: { break; }
+            case emojis[0]: {page = page > 0 ? --page : pages.length - 1; e = emojis[0]; break;}
+            case emojis[1]: {page = page + 1 < pages.length ? ++page : 0; e = emojis[1]; break;}
+            default: {break;}
           }
           if (typeof pages[page] === 'string') {
             msg.edit(embed.setDescription(pages[page]).setFooter(`Page ${page + 1} of ${pages.length}`).setColor(this.client.color));

@@ -53,7 +53,7 @@ class TagCommand extends Command {
         });
         newTag.save().then(() => {
           message.reply(`Tag **${args[1]}** created! Use: \`${this.client.commandHandler.prefix}${this.id} ${args[1]}\``);
-        }).catch(e => {
+        }).catch((e) => {
           this.client.logger.error(e);
         });
         break;
@@ -67,7 +67,7 @@ class TagCommand extends Command {
         tag.description = args.slice(2).join(' ');
         tag.save().then(() => {
           message.reply(`Tag **${args[1]}** edited! Use: \`${this.client.commandHandler.prefix}${this.id} ${args[1]}\``);
-        }).catch(e => {
+        }).catch((e) => {
           this.client.logger.error(e);
         });
         break;
@@ -103,5 +103,5 @@ class TagCommand extends Command {
       }
     }
   }
-};
+}
 module.exports = TagCommand;
