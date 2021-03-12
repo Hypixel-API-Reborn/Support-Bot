@@ -11,7 +11,7 @@ class Client extends AkairoClient {
     this.config = dotenv.config().parsed;
     this.utils = new (require('./Utils'))();
     this.logger = new (require('./Logger'))();
-    this.commandHandler = new CommandHandler(this, { directory: './src/commands', prefix: '!', automateCategories: true, defaultCooldown: 5000, commandUtil: true, ignoreCooldown: '291568379423096832' });
+    this.commandHandler = new CommandHandler(this, { directory: './src/commands', prefix: process.env.NODE_ENV === 'production' ? '?' : '!', automateCategories: true, defaultCooldown: 5000, commandUtil: true, ignoreCooldown: '291568379423096832' });
     this.listenerHandler = new ListenerHandler(this, { directory: './src/events', automateCategories: true });
     this.embedPages = new EmbedPagesRenderer(this);
     this.color = '#ff8c00';
