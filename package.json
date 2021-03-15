@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/Hypixel-API-Reborn/our-awesome-bot#readme",
   "devDependencies": {
-    "eslint": "^7.21.0",
+    "eslint": "^7.22.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
