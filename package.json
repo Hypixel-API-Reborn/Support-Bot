@@ -1,6 +1,6 @@
 {
   "name": "our-awesome-bot",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Bot that helps with everything on discord server https://discord.gg/NSEBNMM",
   "main": "src/index.js",
   "scripts": {
