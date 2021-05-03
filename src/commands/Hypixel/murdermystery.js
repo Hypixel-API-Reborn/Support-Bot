@@ -37,8 +37,7 @@ class MurdermysteryCommand extends Command {
   async exec (message, args) {
     const user = await this.client.getUser(message, args);
     if (!user) return message.reply('I need a player nickname');
-    args.player = user;
-    hypixel.getPlayer(args.player).then((player) => {
+    hypixel.getPlayer(user).then((player) => {
       if (!player.stats || !player.stats.murdermystery) return message.channel.send({ embed: { color: this.client.color, description: 'Player has no stats' } });
       const stats = player.stats.murdermystery;
       const murdermystery = new MessageEmbed()

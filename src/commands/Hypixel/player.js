@@ -2,6 +2,7 @@ const { Command } = require('discord-akairo');
 const { Message, MessageEmbed } = require('discord.js');
 const hypixel = require('../../Hypixel');
 const moment = require('moment');
+const { options } = require('../../Hypixel');
 require('moment-duration-format');
 
 class PlayerCommand extends Command {
@@ -54,13 +55,12 @@ class PlayerCommand extends Command {
     const { minigames } = this.client.utils.constants;
     const user = await this.client.getUser(message, args);
     if (!user) return message.reply('I need a player nickname');
-    args.player = user;
     let minigame;
     if (args.minigame) {
       minigame = minigames.find((m) => m.aliases.includes(args.minigame.toLowerCase()));
-      return this.client.commandHandler.runCommand(message, this.client.commandHandler.findCommand(minigame.name), [args.player]);
+      return this.client.commandHandler.runCommand(message, this.client.commandHandler.findCommand(minigame.name), { player: user });
     }
-    hypixel.getPlayer(args.player, { guild: true }).then(async (player) => {
+    hypixel.getPlayer(user, { guild: true }).then(async (player) => {
       if (args.compact) {
         const embedCompact = new MessageEmbed()
           .setColor(this.client.color)

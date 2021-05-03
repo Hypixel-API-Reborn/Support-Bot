@@ -37,11 +37,10 @@ class StatusCommand extends Command {
    * @param {{player:string}} args
    */
   async exec (message, args) {
-    const user = await User.findOne({ id: message.author.id });
-    if (!user && !args.player) return message.reply('I need player nickname.');
-    if (user && !args.player) args.player = user.uuid;
-    hypixel.getStatus(args.player).then(async (status) => {
-      const player = await hypixel.getPlayer(args.player, { noCaching: true });
+    const user = await this.client.getUser(message, args);
+    if (!user) return message.reply('I need a player nickname');
+    hypixel.getStatus(user).then(async (status) => {
+      const player = await hypixel.getPlayer(user, { noCaching: true });
       const embed = new MessageEmbed()
         .setColor(this.client.color)
         .setAuthor(`${player.rank !== 'Default' ? `[${player.rank}]` : ''} ${player.nickname}`, `https://visage.surgeplay.com/face/64/${player.uuid}`);

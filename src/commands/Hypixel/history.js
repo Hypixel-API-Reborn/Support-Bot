@@ -37,8 +37,7 @@ class HistoryCommand extends Command {
   async exec (message, args) {
     const user = await this.client.getUser(message, args);
     if (!user) return message.reply('I need a player nickname');
-    args.player = user;
-    Utils.toUuid(args.player).then(async (uuid) => {
+    Utils.toUuid(user).then(async (uuid) => {
       const history = await fetch(`https://api.mojang.com/user/profiles/${uuid}/names`).then((r) => r.json());
       const embed = new MessageEmbed()
         .setColor(this.client.color)

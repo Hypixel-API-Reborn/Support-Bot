@@ -19,10 +19,10 @@ class Client extends AkairoClient {
   }
 
   async getUser (message, args) {
+    if (args.player) return args.player;
     const user = await User.findOne({ id: message.author.id });
-    if (!user && !args.player) return null;
-    if (user && !args.player) return user.uuid;
-    return args.player;
+    if (user) return user.uuid;
+    else return null;
   }
 
   async run () {
