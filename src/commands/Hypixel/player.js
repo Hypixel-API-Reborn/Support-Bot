@@ -58,6 +58,14 @@ class PlayerCommand extends Command {
     let minigame;
     if (args.minigame) {
       minigame = minigames.find((m) => m.aliases.includes(args.minigame.toLowerCase()));
+      if (!minigame) {
+        return message.channel.send({
+          embed: {
+            color: this.client.color,
+            description: `Invalid usage!\n\nExamples:\n${minigames.map((m) => `\`${this.client.commandHandler.prefix}player StavZDev -m ${m.name}\``).join('\n')}`
+          }
+        });
+      }
       return this.client.commandHandler.runCommand(message, this.client.commandHandler.findCommand(minigame.name), { player: user });
     }
     hypixel.getPlayer(user, { guild: true }).then(async (player) => {
