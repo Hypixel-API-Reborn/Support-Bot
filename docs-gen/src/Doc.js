@@ -43,7 +43,7 @@ class Doc extends DocBase {
   }
 
   get baseURL () {
-    return 'https://hypixel.stavzdev.me';
+    return 'https://hypixel-api-reborn.github.io';
   }
 
   get baseDocsURL () {
