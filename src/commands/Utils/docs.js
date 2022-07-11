@@ -34,7 +34,7 @@ class DocsCommand extends Command {
     if (!args.query) {
       const embed = new MessageEmbed()
         .setColor(this.client.color)
-        .setDescription(':eyes: Hypixel API • Reborn documentation is [here](https://hypixel.stavzdev.me/).');
+        .setDescription(':eyes: Hypixel API • Reborn documentation is [here](https://hypixel-api-reborn.github.io).');
       return message.channel.send(embed);
     }
     message.channel.send({ embed: docs.resolveEmbed(args.query) });
