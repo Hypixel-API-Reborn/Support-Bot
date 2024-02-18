@@ -1,0 +1,28 @@
+{
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "eslint:recommended"
+  ],
+  "env": { "commonjs": true, "es2021": true, "node": true },
+  "parserOptions": { "ecmaVersion": "latest" },
+  "plugins": [ "@typescript-eslint" ],
+  "overrides": [],
+  "rules": {
+    "no-constant-condition": ["error", { "checkLoops": false }],
+    "curly": [ "error", "multi-line", "consistent" ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-template-curly-in-string": "error",
+    "no-use-before-define": "error",
+    "import/no-unresolved": "off",
+    "no-duplicate-case": "error",
+    "no-throw-literal": "error",
+    "no-self-compare": "error",
+    "no-unreachable": "error",
+    "no-unused-vars": "error",
+    "prefer-const": "error",
+    "no-console": "error",
+    "sort-vars": "error",
+    "no-empty": "error",
+    "no-undef": "error"
+  }
+}
