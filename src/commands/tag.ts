@@ -10,7 +10,7 @@ import {
   EmbedBuilder,
   TextChannel,
 } from 'discord.js';
-import { contributorsRole, teamRole, devRole } from '../../config.json';
+import { contributorsRole, teamRole, devRole, supportCategory } from '../../config.json';
 import { getTag, getTagNames } from '../functions/mongo';
 import { Tag as TagType } from '../types/main';
 import { GuildMember } from 'discord.js';
@@ -92,17 +92,41 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
       }
       case 'send': {
         const name = (interaction.options.getString('name') as string).toLowerCase();
-        const messageLink = interaction.options.getString('message-link') || null;
+        let messageLink = interaction.options.getString('message-link') || null;
         const user = interaction.options.getUser('user');
         const inputTag = await getTag(name);
         if (inputTag.success) {
           await interaction.deferReply({ ephemeral: true });
           if (messageLink) {
+            if (!messageLink.includes('discord.com/channels/')) {
+              return await interaction.followUp({
+                content: 'Invalid message link',
+                ephemeral: true,
+              });
+            }
+            if (!messageLink.includes('https://')) {
+              return await interaction.followUp({
+                content: 'Invalid message link',
+                ephemeral: true,
+              });
+            }
+            if (messageLink.startsWith('https://canary.discord.com')) {
+              messageLink = messageLink.replace('canary.', '');
+            }
+            if (messageLink.startsWith('https://ptb.discord.com')) {
+              messageLink = messageLink.replace('ptb.', '');
+            }
             const split = messageLink.split('https://discord.com/channels/')[1].split('/');
             const channel = await interaction.client.channels.fetch(split[1]);
             if (!channel) {
               return await interaction.followUp({
                 content: 'Channel not found',
+                ephemeral: true,
+              });
+            }
+            if ((channel as TextChannel).parentId !== supportCategory) {
+              return await interaction.followUp({
+                content: 'Tags can only be sent in support channels',
                 ephemeral: true,
               });
             }
@@ -119,6 +143,12 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
                 : (inputTag.tag as TagType).content,
             });
           } else {
+            if ((interaction.channel as TextChannel).parentId !== supportCategory) {
+              return await interaction.followUp({
+                content: 'Tags can only be sent in support channels',
+                ephemeral: true,
+              });
+            }
             (interaction.channel as TextChannel).send({
               content: user
                 ? `${user.toString()}\n\n${(inputTag.tag as TagType).content}`
