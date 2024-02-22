@@ -2,7 +2,7 @@
   "token": "DISCORD_BOT_TOKEN",
   "hypixelAPI": "HYPIXEL_API_KEY",
   "mongoURL": "MONGO_DB_URL",
-  "teamRole": "1209129670684057631",
-  "devRole": "1209129679236366346",
-  "contributorsRole": "1209129679848476782"
+  "teamRole": "TEAM_ROLE_ID",
+  "devRole": "DEV_ROLE_ID",
+  "contributorsRole": "CONTRIBUTORS_ROLE_ID"
 }
