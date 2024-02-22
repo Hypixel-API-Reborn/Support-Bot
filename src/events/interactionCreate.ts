@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import { TextChannel, Interaction, Events, Guild } from 'discord.js';
+import { TextChannel, Interaction, Events, Guild, InteractionType, EmbedBuilder } from 'discord.js';
 import { eventMessage } from '../functions/logger';
+import { Tag } from '../functions/mongo';
 
 export const name = Events.InteractionCreate;
 export const execute = async (interaction: Interaction) => {
@@ -61,6 +62,30 @@ export const execute = async (interaction: Interaction) => {
         await command.execute(interaction);
       } catch (error: any) {
         console.log(error);
+      }
+    } else if (interaction.isAutocomplete()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+
+      if (!command) {
+        console.error(`No command matching ${interaction.commandName} was found.`);
+        return;
+      }
+
+      try {
+        await command.autoComplete(interaction);
+      } catch (error) {
+        console.error(error);
+      }
+    } else if (interaction.type === InteractionType.ModalSubmit) {
+      if (interaction.customId === 'tagForm') {
+        const name = interaction.fields.getTextInputValue('tagFormName').toLowerCase();
+        const content = interaction.fields.getTextInputValue('tagFormContent');
+
+        new Tag(name, content, interaction.user.id, 'approved').save();
+        const embed = new EmbedBuilder()
+          .setTitle('Tag added')
+          .setDescription(`The tag \`${name}\` has been added successfully`);
+        await interaction.reply({ embeds: [embed], ephemeral: true });
       }
     }
   } catch (error: any) {
