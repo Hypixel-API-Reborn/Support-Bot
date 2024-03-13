@@ -5,4 +5,5 @@
   "teamRole": "TEAM_ROLE_ID",
   "devRole": "DEV_ROLE_ID",
   "contributorsRole": "CONTRIBUTORS_ROLE_ID"
+  "supportCategory": "SUPPORT_CATEGORY_ID"
 }
