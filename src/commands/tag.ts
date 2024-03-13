@@ -11,7 +11,7 @@ import {
   TextChannel,
 } from 'discord.js';
 import { contributorsRole, teamRole, devRole, supportCategory } from '../../config.json';
-import { getTag, getTagNames } from '../functions/mongo';
+import { deleteTag, getTag, getTagNames } from '../functions/mongo';
 import { Tag as TagType } from '../types/main';
 import { GuildMember } from 'discord.js';
 
@@ -19,6 +19,19 @@ export const data = new SlashCommandBuilder()
   .setName('tag')
   .setDescription('Tag preset texts')
   .addSubcommand((subcommand) => subcommand.setName('add').setDescription('Add a new tag'))
+  .addSubcommand((subcommand) => subcommand.setName('edit').setDescription('Edit a tag'))
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('delete')
+      .setDescription('Delete a tag')
+      .addStringOption((option) =>
+        option
+          .setName('name')
+          .setDescription('The name of the tag')
+          .setRequired(true)
+          .setAutocomplete(true)
+      )
+  )
   .addSubcommand((subcommand) =>
     subcommand
       .setName('send')
@@ -46,7 +59,11 @@ export const autoComplete = async (interaction: AutocompleteInteraction) => {
   const input = focusedOption.value;
   const names = (await getTagNames()).names as string[];
   let choices: string | any[] = [];
-  if (interaction.options.getSubcommand() === 'send' && focusedOption.name === 'name') {
+  if (
+    (interaction.options.getSubcommand() === 'send' ||
+      interaction.options.getSubcommand() === 'delete') &&
+    focusedOption.name === 'name'
+  ) {
     choices = names.filter((name) => name.includes(input));
   }
   const displayedChoices = choices.slice(0, 25);
@@ -82,6 +99,60 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormContent);
           modal.addComponents(tagFormNameReason, tagFormContentReason);
           await interaction.showModal(modal);
+        } else {
+          return await interaction.reply({
+            content: 'You do not have permission to use this command',
+            ephemeral: true,
+          });
+        }
+        break;
+      }
+      case 'edit': {
+        if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
+          const modal = new ModalBuilder()
+            .setCustomId('tagEditForm')
+            .setTitle('Please enter the updated tag information');
+
+          const tagFormName = new TextInputBuilder()
+            .setStyle(TextInputStyle.Short)
+            .setCustomId('tagFormUpdatedName')
+            .setRequired(true)
+            .setLabel('Name');
+
+          const tagFormContent = new TextInputBuilder()
+            .setStyle(TextInputStyle.Paragraph)
+            .setCustomId('tagFormUpdatedContent')
+            .setLabel('New Tag Content')
+            .setRequired(true);
+
+          const tagFormNameReason =
+            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
+          const tagFormContentReason =
+            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormContent);
+          modal.addComponents(tagFormNameReason, tagFormContentReason);
+          await interaction.showModal(modal);
+        } else {
+          return await interaction.reply({
+            content: 'You do not have permission to use this command',
+            ephemeral: true,
+          });
+        }
+        break;
+      }
+      case 'delete': {
+        if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
+          const inputTag = await deleteTag(interaction.options.getString('name') as string);
+          if (inputTag.success) {
+            return await interaction.reply({
+              content: 'Tag deleted successfully',
+              ephemeral: true,
+            });
+          } else {
+            return await interaction.reply({
+              content: 'Tag not found',
+              ephemeral: true,
+            });
+          }
         } else {
           return await interaction.reply({
             content: 'You do not have permission to use this command',

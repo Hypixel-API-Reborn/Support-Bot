@@ -53,6 +53,19 @@ export const modifyTag = async (name: string, tag: TagType) => {
   }
 };
 
+export const deleteTag = async (name: string) => {
+  try {
+    const tag = await TagModel.deleteOne({ name: name });
+    if (tag) {
+      return { success: true, info: 'Tag deleted successfully' };
+    } else {
+      return { success: false, info: 'Tag not found' };
+    }
+  } catch (error) {
+    return { success: false, info: 'An error occurred', error: error };
+  }
+};
+
 export const getTag = async (name: string) => {
   try {
     const tag = await TagModel.findOne({ name: name });
