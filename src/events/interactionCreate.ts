@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
-import { TextChannel, Interaction, Events, Guild, InteractionType, EmbedBuilder } from 'discord.js';
+import { TextChannel, Interaction, Events, Guild, InteractionType, EmbedBuilder, GuildMember } from 'discord.js';
+import { teamRole, devRole } from '../../config.json';
 import { eventMessage } from '../functions/logger';
 import { Tag, modifyTag } from '../functions/mongo';
 
 export const name = Events.InteractionCreate;
 export const execute = async (interaction: Interaction) => {
   try {
+    const memberRoles = (interaction.member as GuildMember).roles.cache.map((role) => role.id);
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
       if (!command) return;
@@ -88,6 +90,7 @@ export const execute = async (interaction: Interaction) => {
         await interaction.reply({ embeds: [embed], ephemeral: true });
       }
       if (interaction.customId === 'tagEditForm') {
+        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) return
         const name = interaction.fields.getTextInputValue('tagFormUpdatedName').toLowerCase();
         const content = interaction.fields.getTextInputValue('tagFormUpdatedContent');
 

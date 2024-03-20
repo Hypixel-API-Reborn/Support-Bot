@@ -108,7 +108,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         break;
       }
       case 'edit': {
-        if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
+        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
           const modal = new ModalBuilder()
             .setCustomId('tagEditForm')
             .setTitle('Please enter the updated tag information');
@@ -140,7 +140,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         break;
       }
       case 'delete': {
-        if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
+        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
           const inputTag = await deleteTag(interaction.options.getString('name') as string);
           if (inputTag.success) {
             return await interaction.reply({
