@@ -1,16 +1,8 @@
 import { Collection, SlashCommandBuilder, ChatInputCommandInteraction } from 'discord';
 
 export interface SlashCommand {
-  command: SlashCommandBuilder | any;
-
+  command: SlashCommandBuilder;
   execute: (interaction: ChatInputCommandInteraction) => void;
-}
-
-export interface Tag {
-  content: string;
-  status: string;
-  name: string;
-  id: string;
 }
 
 declare module 'discord.js' {

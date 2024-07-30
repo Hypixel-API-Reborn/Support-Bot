@@ -1,14 +1,19 @@
 import { Schema, connect, model } from 'mongoose';
-import { Tag as TagType } from '../types/main';
 import { mongoURL } from '../../config.json';
 
-export const connectDB = () => {
+export function connectDB(): void {
   connect(mongoURL).then(() => {
     // eslint-disable-next-line no-console
     console.log('Connected to MongoDB');
   });
-};
+}
 
+export interface TagType {
+  content: string;
+  status: string;
+  name: string;
+  id: string;
+}
 const tagSchema = new Schema({
   content: String,
   status: String,
@@ -40,7 +45,16 @@ export class Tag {
   }
 }
 
-export const modifyTag = async (name: string, tag: TagType) => {
+export interface TagResponse {
+  success: boolean;
+  info: string;
+  tag?: TagType;
+  names?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error?: any;
+}
+
+export async function modifyTag(name: string, tag: TagType): Promise<TagResponse> {
   try {
     const modifiedTag = await TagModel.findOneAndUpdate({ name: name }, tag);
     if (modifiedTag) {
@@ -50,9 +64,9 @@ export const modifyTag = async (name: string, tag: TagType) => {
   } catch (error) {
     return { success: false, info: 'An error occurred', error: error };
   }
-};
+}
 
-export const deleteTag = async (name: string) => {
+export async function deleteTag(name: string): Promise<TagResponse> {
   try {
     const tag = await TagModel.deleteOne({ name: name });
     if (tag) {
@@ -62,21 +76,21 @@ export const deleteTag = async (name: string) => {
   } catch (error) {
     return { success: false, info: 'An error occurred', error: error };
   }
-};
+}
 
-export const getTag = async (name: string) => {
+export async function getTag(name: string): Promise<TagResponse> {
   try {
     const tag = await TagModel.findOne({ name: name });
     if (tag) {
-      return { success: true, info: 'Tag found', tag: tag };
+      return { success: true, info: 'Tag found', tag: tag as TagType };
     }
     return { success: false, info: 'Tag not found' };
   } catch (error) {
     return { success: false, info: 'An error occurred', error: error };
   }
-};
+}
 
-export const getTagNames = async () => {
+export async function getTagNames(): Promise<TagResponse> {
   try {
     const tags = await TagModel.find();
     if (tags) {
@@ -84,7 +98,8 @@ export const getTagNames = async () => {
       tags
         .filter((tag) => 'approved' === tag.status)
         .forEach((tag) => {
-          return names.push(tag.name as string);
+          if (!tag.name) return;
+          return names.push(tag.name);
         });
       return { success: true, info: 'Tags found', names: names };
     }
@@ -92,4 +107,4 @@ export const getTagNames = async () => {
   } catch (error) {
     return { success: false, info: 'An error occurred', error: error };
   }
-};
+}

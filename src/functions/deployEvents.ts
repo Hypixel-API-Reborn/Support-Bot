@@ -2,7 +2,7 @@ import { errorMessage, eventMessage } from './logger';
 import { Client } from 'discord.js';
 import { readdirSync } from 'fs';
 
-export const deployEvents = async (client: Client) => {
+export default async function (client: Client): Promise<void> {
   try {
     const eventFiles = readdirSync('./src/events/');
     let count = eventFiles.length;
@@ -17,7 +17,8 @@ export const deployEvents = async (client: Client) => {
       eventMessage(`Successfully loaded ${name}`);
     }
     eventMessage(`Successfully loaded ${count} event(s).`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     errorMessage(error);
   }
-};
+}

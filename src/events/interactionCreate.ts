@@ -1,29 +1,24 @@
 /* eslint-disable no-console */
-import { Interaction, Events, InteractionType, EmbedBuilder, GuildMember } from 'discord.js';
+import { Interaction, Events, InteractionType, EmbedBuilder, GuildMemberRoleManager } from 'discord.js';
 import { teamRole, devRole } from '../../config.json';
 import { Tag, modifyTag } from '../functions/mongo';
 import { eventMessage } from '../functions/logger';
 
 export const name = Events.InteractionCreate;
-export const execute = async (interaction: Interaction) => {
+export async function execute(interaction: Interaction): Promise<void> {
   try {
-    const memberRoles = (interaction.member as GuildMember).roles.cache.map((role) => role.id);
+    if (!interaction.member || !interaction.channel || !interaction.guild) return;
+    const memberRoles = (interaction.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
-      if (!command) return;
-      if (!interaction.channel) return;
-      if (!interaction.guild) return;
       try {
-        try {
-          eventMessage(
-            `Interaction Event trigged by ${interaction.user.username} (${interaction.user.id}
-            ) ran command ${interaction.commandName} in ${interaction.guild.id} in ${interaction.channel.id}`
-          );
-        } catch (error: any) {
-          console.log(error);
-        }
+        eventMessage(
+          `Interaction Event trigged by ${interaction.user.username} (${
+            interaction.user.id
+          }) ran command ${interaction.commandName} in ${interaction.guild.id} in ${interaction.channel.id}`
+        );
         await command.execute(interaction);
-      } catch (error: any) {
+      } catch (error) {
         console.log(error);
       }
     } else if (interaction.isAutocomplete()) {
@@ -68,7 +63,7 @@ export const execute = async (interaction: Interaction) => {
         }
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     console.log(error);
   }
-};
+}

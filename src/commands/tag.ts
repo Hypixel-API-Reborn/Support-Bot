@@ -2,18 +2,17 @@ import {
   ModalActionRowComponentBuilder,
   ChatInputCommandInteraction,
   AutocompleteInteraction,
+  GuildMemberRoleManager,
   SlashCommandBuilder,
   TextInputBuilder,
   ActionRowBuilder,
   TextInputStyle,
   ModalBuilder,
   EmbedBuilder,
-  TextChannel
+  ChannelType
 } from 'discord.js';
 import { contributorsRole, teamRole, devRole, supportCategory } from '../../config.json';
 import { deleteTag, getTag, getTagNames } from '../functions/mongo';
-import { Tag as TagType } from '../types/main';
-import { GuildMember } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
   .setName('tag')
@@ -50,11 +49,12 @@ export const data = new SlashCommandBuilder()
       )
   );
 
-export const autoComplete = async (interaction: AutocompleteInteraction) => {
+export async function autoComplete(interaction: AutocompleteInteraction): Promise<void> {
   const focusedOption = interaction.options.getFocused(true);
   const input = focusedOption.value;
-  const names = (await getTagNames()).names as string[];
-  let choices: string | any[] = [];
+  const names = (await getTagNames()).names;
+  if (!names) return;
+  let choices: string | string[] = [];
   if (
     ('send' === interaction.options.getSubcommand() ||
       'edit' === interaction.options.getSubcommand() ||
@@ -65,12 +65,13 @@ export const autoComplete = async (interaction: AutocompleteInteraction) => {
   }
   const displayedChoices = choices.slice(0, 25);
   await interaction.respond(displayedChoices.map((choice) => ({ name: choice, value: choice })));
-};
+}
 
-export const execute = async (interaction: ChatInputCommandInteraction) => {
+export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
   try {
+    if (!interaction.member) return;
     const subCommand = interaction.options.getSubcommand();
-    const memberRoles = (interaction.member as GuildMember).roles.cache.map((role) => role.id);
+    const memberRoles = (interaction.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     switch (subCommand) {
       case 'add': {
         if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
@@ -95,7 +96,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
           modal.addComponents(tagFormNameReason, tagFormContentReason);
           await interaction.showModal(modal);
         } else {
-          return await interaction.reply({
+          await interaction.reply({
             content: 'You do not have permission to use this command',
             ephemeral: true
           });
@@ -103,7 +104,9 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         break;
       }
       case 'edit': {
-        const name = (interaction.options.getString('name') as string).toLowerCase();
+        let name = interaction.options.getString('name');
+        if (!name) return;
+        name = name.toLowerCase();
         if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
           const modal = new ModalBuilder()
             .setCustomId(`t.e.${name}`)
@@ -121,7 +124,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
           modal.addComponents(tagFormContentReason);
           await interaction.showModal(modal);
         } else {
-          return await interaction.reply({
+          await interaction.reply({
             content: 'You do not have permission to use this command',
             ephemeral: true
           });
@@ -130,42 +133,51 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
       }
       case 'delete': {
         if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
-          const inputTag = await deleteTag((interaction.options.getString('name') as string).toLowerCase());
+          const name = interaction.options.getString('name');
+          if (!name) return;
+          const inputTag = await deleteTag(name.toLowerCase());
           if (inputTag.success) {
-            return await interaction.reply({
+            await interaction.reply({
               content: 'Tag deleted successfully',
               ephemeral: true
             });
+            return;
           }
-          return await interaction.reply({
+          await interaction.reply({
             content: 'Tag not found',
             ephemeral: true
           });
+          return;
         }
-        return await interaction.reply({
+        await interaction.reply({
           content: 'You do not have permission to use this command',
           ephemeral: true
         });
+        return;
       }
       case 'send': {
-        const name = (interaction.options.getString('name') as string).toLowerCase();
+        const name = interaction.options.getString('name');
+        if (!name) return;
         let messageLink = interaction.options.getString('message-link') || null;
         const user = interaction.options.getUser('user');
-        const inputTag = await getTag(name);
+        const inputTag = await getTag(name.toLowerCase());
         if (inputTag.success) {
+          if (!inputTag.tag?.status) return;
           await interaction.deferReply({ ephemeral: true });
           if (messageLink) {
             if (!messageLink.includes('discord.com/channels/')) {
-              return await interaction.followUp({
+              await interaction.followUp({
                 content: 'Invalid message link',
                 ephemeral: true
               });
+              return;
             }
             if (!messageLink.includes('https://')) {
-              return await interaction.followUp({
+              await interaction.followUp({
                 content: 'Invalid message link',
                 ephemeral: true
               });
+              return;
             }
             if (messageLink.startsWith('https://canary.discord.com')) {
               messageLink = messageLink.replace('canary.', '');
@@ -176,70 +188,84 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             const split = messageLink.split('https://discord.com/channels/')[1].split('/');
             const channel = await interaction.client.channels.fetch(split[1]);
             if (!channel) {
-              return await interaction.followUp({
+              await interaction.followUp({
                 content: 'Channel not found',
                 ephemeral: true
               });
+              return;
             }
-            if ((channel as TextChannel).parentId !== supportCategory) {
-              return await interaction.followUp({
+            if (channel.type !== ChannelType.GuildText) {
+              await interaction.followUp({
+                content: 'Invalid channel type',
+                ephemeral: true
+              });
+              return;
+            }
+            if (channel.parentId !== supportCategory) {
+              await interaction.followUp({
                 content: 'Tags can only be sent in support channels',
                 ephemeral: true
               });
+              return;
             }
-            const message = await (channel as TextChannel).messages.fetch(split[2]);
+            const message = await channel.messages.fetch(split[2]);
             if (!message) {
-              return await interaction.followUp({
+              await interaction.followUp({
                 content: 'Message not found',
                 ephemeral: true
               });
+              return;
             }
             message.reply({
-              content: user
-                ? `${user.toString()}\n\n${(inputTag.tag as TagType).content}`
-                : (inputTag.tag as TagType).content
+              content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content
             });
           } else {
-            if ((interaction.channel as TextChannel).parentId !== supportCategory) {
-              return await interaction.followUp({
+            if (!interaction.channel) return;
+            if (interaction.channel.type !== ChannelType.GuildText) {
+              return;
+            }
+            if (interaction.channel.parentId !== supportCategory) {
+              await interaction.followUp({
                 content: 'Tags can only be sent in support channels',
                 ephemeral: true
               });
+              return;
             }
-            (interaction.channel as TextChannel).send({
-              content: user
-                ? `${user.toString()}\n\n${(inputTag.tag as TagType).content}`
-                : (inputTag.tag as TagType).content
+            interaction.channel.send({
+              content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content
             });
           }
 
           const embed = new EmbedBuilder().setTitle('Tag sent').setDescription(`Tag \`${name}\` sent`);
-          return await interaction.followUp({ embeds: [embed] });
+          await interaction.followUp({ embeds: [embed] });
+          return;
         }
-        return await interaction.reply({
+        await interaction.reply({
           content: 'Tag not found',
           ephemeral: true
         });
+        return;
       }
       default: {
         const embed = new EmbedBuilder()
           .setTitle('Invalid subcommand')
           .setDescription('Please provide a valid subcommand');
-        return await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
       }
     }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.log(error);
     if (interaction.replied || interaction.deferred) {
-      return await interaction.followUp({
+      await interaction.followUp({
         content: 'Something went wrong. Please try again later.',
         ephemeral: true
       });
+      return;
     }
-    return await interaction.reply({
+    await interaction.reply({
       content: 'Something went wrong. Please try again later.',
       ephemeral: true
     });
   }
-};
+}

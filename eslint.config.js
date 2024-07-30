@@ -21,7 +21,6 @@ export default [
       'no-constant-condition': ['error', { checkLoops: false }],
       'prefer-const': ['warn', { destructuring: 'all' }],
       curly: ['warn', 'multi-line', 'consistent'],
-      '@typescript-eslint/no-explicit-any': 'off',
       'logical-assignment-operators': 'warn',
       'no-template-curly-in-string': 'error',
       'quote-props': ['error', 'as-needed'],

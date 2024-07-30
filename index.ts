@@ -1,9 +1,9 @@
-import { deployCommands } from './src/functions/deployCommands';
 import { Client, Events, GatewayIntentBits } from 'discord.js';
+import deployCommands from './src/functions/deployCommands';
 import { execute } from './src/events/ready';
 import { token } from './config.json';
 
-const client = new Client({
+const client: Client = new Client({
   intents: [
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessages,
