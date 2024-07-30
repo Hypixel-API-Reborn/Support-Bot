@@ -10,7 +10,7 @@ const timezone = () => {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
-    hour12: false,
+    hour12: false
   });
 };
 
@@ -32,7 +32,7 @@ const cacheLogger = createLogger({
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [cacheTransport, combinedTransport, consoleTransport],
+  transports: [cacheTransport, combinedTransport, consoleTransport]
 });
 
 const eventLogger = createLogger({
@@ -44,7 +44,7 @@ const eventLogger = createLogger({
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [eventTransport, combinedTransport, consoleTransport],
+  transports: [eventTransport, combinedTransport, consoleTransport]
 });
 
 const errorLogger = createLogger({
@@ -56,7 +56,7 @@ const errorLogger = createLogger({
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [errorTransport, combinedTransport, consoleTransport],
+  transports: [errorTransport, combinedTransport, consoleTransport]
 });
 
 const scriptLogger = createLogger({
@@ -68,7 +68,7 @@ const scriptLogger = createLogger({
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [scriptTransport, combinedTransport, consoleTransport],
+  transports: [scriptTransport, combinedTransport, consoleTransport]
 });
 
 const warnLogger = createLogger({
@@ -80,7 +80,7 @@ const warnLogger = createLogger({
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [warnTransport, combinedTransport, consoleTransport],
+  transports: [warnTransport, combinedTransport, consoleTransport]
 });
 
 const otherLogger = createLogger({
@@ -92,7 +92,7 @@ const otherLogger = createLogger({
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [otherTransport, combinedTransport, consoleTransport],
+  transports: [otherTransport, combinedTransport, consoleTransport]
 });
 
 const logger = {
@@ -113,7 +113,7 @@ const logger = {
   },
   other: (message: string) => {
     otherLogger.log('other', message);
-  },
+  }
 };
 
 export const updateMessage = () => {

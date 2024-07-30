@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "target": "es2016",
-    "outDir": "./dist",
-    "module": "CommonJS",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
-    "typeRoots": ["./src/types"],
-    "forceConsistentCasingInFileNames": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./build",
+    "module": "ES2022",
+    "target": "ES2022",
+    "strict": true
   }
 }

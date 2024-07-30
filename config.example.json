@@ -1,9 +1,8 @@
 {
   "token": "DISCORD_BOT_TOKEN",
-  "hypixelAPI": "HYPIXEL_API_KEY",
   "mongoURL": "MONGO_DB_URL",
   "teamRole": "TEAM_ROLE_ID",
   "devRole": "DEV_ROLE_ID",
-  "contributorsRole": "CONTRIBUTORS_ROLE_ID"
+  "contributorsRole": "CONTRIBUTORS_ROLE_ID",
   "supportCategory": "SUPPORT_CATEGORY_ID"
 }
