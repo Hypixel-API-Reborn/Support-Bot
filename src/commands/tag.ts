@@ -45,14 +45,14 @@ export const data = new SlashCommandBuilder()
 
 export const autoComplete = async (interaction: AutocompleteInteraction) => {
   const focusedOption = interaction.options.getFocused(true);
-  const choices: string | any[] = [];
-  if (
-    ('send' === interaction.options.getSubcommand() || 'delete' === interaction.options.getSubcommand()) &&
-    'name' === focusedOption.name
-  ) {
-    const displayedChoices = choices.slice(0, 25);
-    await interaction.respond(displayedChoices.map((choice) => ({ name: choice, value: choice })));
+  const input = focusedOption.value;
+  const names = (await getTagNames()).names as string[];
+  let choices: string | any[] = [];
+  if ('send' === interaction.options.getSubcommand() && 'name' === focusedOption.name) {
+    choices = names.filter((name) => name.includes(input));
   }
+  const displayedChoices = choices.slice(0, 25);
+  await interaction.respond(displayedChoices.map((choice) => ({ name: choice, value: choice })));
 };
 
 export const execute = async (interaction: ChatInputCommandInteraction) => {
