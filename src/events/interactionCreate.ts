@@ -50,9 +50,9 @@ export const execute = async (interaction: Interaction) => {
           .setDescription(`The tag \`${name}\` has been added successfully`);
         await interaction.reply({ embeds: [embed], ephemeral: true });
       }
-      if ('tagEditForm' === interaction.customId) {
+      if (interaction.customId.startsWith('t.e.')) {
         if (memberRoles.some((role) => [teamRole, devRole].includes(role))) return;
-        const name = interaction.fields.getTextInputValue('tagFormUpdatedName').toLowerCase();
+        const name = interaction.customId.split('.')[2];
         const content = interaction.fields.getTextInputValue('tagFormUpdatedContent');
 
         const updatedTag = await modifyTag(name, new Tag(name, content, interaction.user.id, 'approved'));

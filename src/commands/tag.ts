@@ -19,7 +19,14 @@ export const data = new SlashCommandBuilder()
   .setName('tag')
   .setDescription('Tag preset texts')
   .addSubcommand((subcommand) => subcommand.setName('add').setDescription('Add a new tag'))
-  .addSubcommand((subcommand) => subcommand.setName('edit').setDescription('Edit a tag'))
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('edit')
+      .setDescription('Edit a tag')
+      .addStringOption((option) =>
+        option.setName('name').setDescription('The name of the tag').setRequired(true).setAutocomplete(true)
+      )
+  )
   .addSubcommand((subcommand) =>
     subcommand
       .setName('delete')
@@ -48,7 +55,12 @@ export const autoComplete = async (interaction: AutocompleteInteraction) => {
   const input = focusedOption.value;
   const names = (await getTagNames()).names as string[];
   let choices: string | any[] = [];
-  if ('send' === interaction.options.getSubcommand() && 'name' === focusedOption.name) {
+  if (
+    ('send' === interaction.options.getSubcommand() ||
+      'edit' === interaction.options.getSubcommand() ||
+      'delete' === interaction.options.getSubcommand()) &&
+    'name' === focusedOption.name
+  ) {
     choices = names.filter((name) => name.includes(input));
   }
   const displayedChoices = choices.slice(0, 25);
@@ -91,16 +103,11 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         break;
       }
       case 'edit': {
+        const name = (interaction.options.getString('name') as string).toLowerCase();
         if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
           const modal = new ModalBuilder()
-            .setCustomId('tagEditForm')
+            .setCustomId(`t.e.${name}`)
             .setTitle('Please enter the updated tag information');
-
-          const tagFormName = new TextInputBuilder()
-            .setStyle(TextInputStyle.Short)
-            .setCustomId('tagFormUpdatedName')
-            .setRequired(true)
-            .setLabel('Name');
 
           const tagFormContent = new TextInputBuilder()
             .setStyle(TextInputStyle.Paragraph)
@@ -108,11 +115,10 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             .setLabel('New Tag Content')
             .setRequired(true);
 
-          const tagFormNameReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
           const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
             tagFormContent
           );
-          modal.addComponents(tagFormNameReason, tagFormContentReason);
+          modal.addComponents(tagFormContentReason);
           await interaction.showModal(modal);
         } else {
           return await interaction.reply({
@@ -124,7 +130,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
       }
       case 'delete': {
         if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
-          const inputTag = await deleteTag(interaction.options.getString('name') as string);
+          const inputTag = await deleteTag((interaction.options.getString('name') as string).toLowerCase());
           if (inputTag.success) {
             return await interaction.reply({
               content: 'Tag deleted successfully',
@@ -140,8 +146,6 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
           content: 'You do not have permission to use this command',
           ephemeral: true
         });
-
-        break;
       }
       case 'send': {
         const name = (interaction.options.getString('name') as string).toLowerCase();
