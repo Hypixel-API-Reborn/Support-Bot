@@ -57,9 +57,8 @@ export const deleteTag = async (name: string) => {
     const tag = await TagModel.deleteOne({ name: name });
     if (tag) {
       return { success: true, info: 'Tag deleted successfully' };
-    } else {
-      return { success: false, info: 'Tag not found' };
     }
+    return { success: false, info: 'Tag not found' };
   } catch (error) {
     return { success: false, info: 'An error occurred', error: error };
   }

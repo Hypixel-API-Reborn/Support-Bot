@@ -25,11 +25,7 @@ export const data = new SlashCommandBuilder()
       .setName('delete')
       .setDescription('Delete a tag')
       .addStringOption((option) =>
-        option
-          .setName('name')
-          .setDescription('The name of the tag')
-          .setRequired(true)
-          .setAutocomplete(true)
+        option.setName('name').setDescription('The name of the tag').setRequired(true).setAutocomplete(true)
       )
   )
   .addSubcommand((subcommand) =>
@@ -49,16 +45,14 @@ export const data = new SlashCommandBuilder()
 
 export const autoComplete = async (interaction: AutocompleteInteraction) => {
   const focusedOption = interaction.options.getFocused(true);
-  const input = focusedOption.value;
-  const names = (await getTagNames()).names as string[];
-  let choices: string | any[] = [];
+  const choices: string | any[] = [];
   if (
-    (interaction.options.getSubcommand() === 'send' ||
-      interaction.options.getSubcommand() === 'delete') &&
-    focusedOption.name === 'name'
+    ('send' === interaction.options.getSubcommand() || 'delete' === interaction.options.getSubcommand()) &&
+    'name' === focusedOption.name
   ) {
-  const displayedChoices = choices.slice(0, 25);
-  await interaction.respond(displayedChoices.map((choice) => ({ name: choice, value: choice })));
+    const displayedChoices = choices.slice(0, 25);
+    await interaction.respond(displayedChoices.map((choice) => ({ name: choice, value: choice })));
+  }
 };
 
 export const execute = async (interaction: ChatInputCommandInteraction) => {
@@ -114,16 +108,16 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             .setLabel('New Tag Content')
             .setRequired(true);
 
-          const tagFormNameReason =
-            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
-          const tagFormContentReason =
-            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormContent);
+          const tagFormNameReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
+          const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+            tagFormContent
+          );
           modal.addComponents(tagFormNameReason, tagFormContentReason);
           await interaction.showModal(modal);
         } else {
           return await interaction.reply({
             content: 'You do not have permission to use this command',
-            ephemeral: true,
+            ephemeral: true
           });
         }
         break;
@@ -134,20 +128,19 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
           if (inputTag.success) {
             return await interaction.reply({
               content: 'Tag deleted successfully',
-              ephemeral: true,
-            });
-          } else {
-            return await interaction.reply({
-              content: 'Tag not found',
-              ephemeral: true,
+              ephemeral: true
             });
           }
-        } else {
           return await interaction.reply({
-            content: 'You do not have permission to use this command',
-            ephemeral: true,
+            content: 'Tag not found',
+            ephemeral: true
           });
         }
+        return await interaction.reply({
+          content: 'You do not have permission to use this command',
+          ephemeral: true
+        });
+
         break;
       }
       case 'send': {

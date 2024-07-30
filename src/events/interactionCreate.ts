@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import { Interaction, Events, InteractionType, EmbedBuilder } from 'discord.js';
+import { Interaction, Events, InteractionType, EmbedBuilder, GuildMember } from 'discord.js';
 import { teamRole, devRole } from '../../config.json';
-import { eventMessage } from '../functions/logger';
 import { Tag, modifyTag } from '../functions/mongo';
+import { eventMessage } from '../functions/logger';
 
 export const name = Events.InteractionCreate;
 export const execute = async (interaction: Interaction) => {
@@ -50,21 +50,18 @@ export const execute = async (interaction: Interaction) => {
           .setDescription(`The tag \`${name}\` has been added successfully`);
         await interaction.reply({ embeds: [embed], ephemeral: true });
       }
-      if (interaction.customId === 'tagEditForm') {
-        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) return
+      if ('tagEditForm' === interaction.customId) {
+        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) return;
         const name = interaction.fields.getTextInputValue('tagFormUpdatedName').toLowerCase();
         const content = interaction.fields.getTextInputValue('tagFormUpdatedContent');
 
-        const updatedTag = await modifyTag(
-          name,
-          new Tag(name, content, interaction.user.id, 'approved')
-        );
+        const updatedTag = await modifyTag(name, new Tag(name, content, interaction.user.id, 'approved'));
         if (updatedTag.success) {
           const embed = new EmbedBuilder()
             .setTitle('Tag Updated')
             .setDescription(`The tag \`${name}\` has been added successfully`);
           await interaction.reply({ embeds: [embed], ephemeral: true });
-        } else if (updatedTag.success === false && updatedTag.info === 'Tag not found') {
+        } else if (false === updatedTag.success && 'Tag not found' === updatedTag.info) {
           await interaction.reply({ content: 'This tag does not exist!', ephemeral: true });
         } else {
           await interaction.reply({ content: 'An error occurred', ephemeral: true });
