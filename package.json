@@ -13,8 +13,16 @@
     "build": "npx tsc --build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kathund",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=9.6.0",
+    "npm": "forbidden, use pnpm instead",
+    "yarn": "forbidden, use pnpm instead",
+    "bun": "forbidden, use pnpm instead"
+  },
+  "packageManager": "pnpm@9.6.0",
   "dependencies": {
     "axios": "^1.6.7",
     "common-tags": "^1.8.2",
