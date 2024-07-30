@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
-import { Interaction, Events, InteractionType, EmbedBuilder } from 'discord.js';
+import { Interaction, Events, InteractionType, EmbedBuilder, GuildMember } from 'discord.js';
+import { teamRole, devRole } from '../../config.json';
+import { Tag, modifyTag } from '../functions/mongo';
 import { eventMessage } from '../functions/logger';
-import { Tag } from '../functions/mongo';
 
 export const name = Events.InteractionCreate;
 export const execute = async (interaction: Interaction) => {
   try {
+    const memberRoles = (interaction.member as GuildMember).roles.cache.map((role) => role.id);
     if (interaction.isChatInputCommand()) {
       const command = interaction.client.commands.get(interaction.commandName);
       if (!command) return;
@@ -47,6 +49,23 @@ export const execute = async (interaction: Interaction) => {
           .setTitle('Tag added')
           .setDescription(`The tag \`${name}\` has been added successfully`);
         await interaction.reply({ embeds: [embed], ephemeral: true });
+      }
+      if (interaction.customId.startsWith('t.e.')) {
+        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) return;
+        const name = interaction.customId.split('.')[2];
+        const content = interaction.fields.getTextInputValue('tagFormUpdatedContent');
+
+        const updatedTag = await modifyTag(name, new Tag(name, content, interaction.user.id, 'approved'));
+        if (updatedTag.success) {
+          const embed = new EmbedBuilder()
+            .setTitle('Tag Updated')
+            .setDescription(`The tag \`${name}\` has been added successfully`);
+          await interaction.reply({ embeds: [embed], ephemeral: true });
+        } else if (false === updatedTag.success && 'Tag not found' === updatedTag.info) {
+          await interaction.reply({ content: 'This tag does not exist!', ephemeral: true });
+        } else {
+          await interaction.reply({ content: 'An error occurred', ephemeral: true });
+        }
       }
     }
   } catch (error: any) {
