@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import axios from 'axios';
+import Doc from 'discord.js-docs';
 
 export const data = new SlashCommandBuilder()
   .setName('docs')
@@ -19,13 +19,9 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         );
       return await interaction.reply({ embeds: [embed] });
     } else {
-      const master = await axios.get(
-        'https://raw.githubusercontent.com/hypixel-api-reborn/hypixel-api-reborn/docs/master.json'
-      );
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const docs = new (require('../../docs-gen'))(
+      const docs = await Doc.fetch(
         'https://raw.githubusercontent.com/hypixel-api-reborn/hypixel-api-reborn/docs/master.json',
-        master.data
+        { force: true }
       );
       return await interaction.reply({ embeds: [docs.resolveEmbed(query)] });
     }
