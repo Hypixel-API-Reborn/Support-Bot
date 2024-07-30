@@ -4,5 +4,7 @@
   "teamRole": "TEAM_ROLE_ID",
   "devRole": "DEV_ROLE_ID",
   "contributorsRole": "CONTRIBUTORS_ROLE_ID",
-  "supportCategory": "SUPPORT_CATEGORY_ID"
+  "supportCategory": "SUPPORT_CATEGORY_ID",
+  "autoModBypassRole": "AUTOMOD_BYPASS_ROLE_ID",
+  "serverId": "SERVER_ID"
 }

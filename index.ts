@@ -1,5 +1,5 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import deployCommands from './src/functions/deployCommands';
+import DeployCommands from './src/functions/DeployCommands';
 import { execute } from './src/events/ready';
 import { token } from './config.json';
 
@@ -12,7 +12,7 @@ const client: Client = new Client({
   ]
 });
 
-deployCommands(client);
+DeployCommands(client);
 
 client.on(Events.ClientReady, () => {
   execute(client);
