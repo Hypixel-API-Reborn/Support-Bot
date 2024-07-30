@@ -8,7 +8,7 @@ import {
   TextInputStyle,
   ModalBuilder,
   EmbedBuilder,
-  TextChannel,
+  TextChannel
 } from 'discord.js';
 import { contributorsRole, teamRole, devRole, supportCategory } from '../../config.json';
 import { deleteTag, getTag, getTagNames } from '../functions/mongo';
@@ -37,20 +37,13 @@ export const data = new SlashCommandBuilder()
       .setName('send')
       .setDescription('Send a tag')
       .addStringOption((option) =>
-        option
-          .setName('name')
-          .setDescription('The name of the tag')
-          .setRequired(true)
-          .setAutocomplete(true)
+        option.setName('name').setDescription('The name of the tag').setRequired(true).setAutocomplete(true)
       )
       .addUserOption((option) =>
         option.setName('user').setDescription('The user to mention this tag to').setRequired(false)
       )
       .addStringOption((option) =>
-        option
-          .setName('message-link')
-          .setDescription('The Message link to reply with the tag')
-          .setRequired(false)
+        option.setName('message-link').setDescription('The Message link to reply with the tag').setRequired(false)
       )
   );
 
@@ -64,8 +57,6 @@ export const autoComplete = async (interaction: AutocompleteInteraction) => {
       interaction.options.getSubcommand() === 'delete') &&
     focusedOption.name === 'name'
   ) {
-    choices = names.filter((name) => name.includes(input));
-  }
   const displayedChoices = choices.slice(0, 25);
   await interaction.respond(displayedChoices.map((choice) => ({ name: choice, value: choice })));
 };
@@ -77,9 +68,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
     switch (subCommand) {
       case 'add': {
         if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
-          const modal = new ModalBuilder()
-            .setCustomId('tagForm')
-            .setTitle('Please enter the tag information');
+          const modal = new ModalBuilder().setCustomId('tagForm').setTitle('Please enter the tag information');
 
           const tagFormName = new TextInputBuilder()
             .setStyle(TextInputStyle.Short)
@@ -93,16 +82,16 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             .setLabel('Tag Content')
             .setRequired(true);
 
-          const tagFormNameReason =
-            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
-          const tagFormContentReason =
-            new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormContent);
+          const tagFormNameReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
+          const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+            tagFormContent
+          );
           modal.addComponents(tagFormNameReason, tagFormContentReason);
           await interaction.showModal(modal);
         } else {
           return await interaction.reply({
             content: 'You do not have permission to use this command',
-            ephemeral: true,
+            ephemeral: true
           });
         }
         break;
@@ -172,13 +161,13 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             if (!messageLink.includes('discord.com/channels/')) {
               return await interaction.followUp({
                 content: 'Invalid message link',
-                ephemeral: true,
+                ephemeral: true
               });
             }
             if (!messageLink.includes('https://')) {
               return await interaction.followUp({
                 content: 'Invalid message link',
-                ephemeral: true,
+                ephemeral: true
               });
             }
             if (messageLink.startsWith('https://canary.discord.com')) {
@@ -192,51 +181,48 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             if (!channel) {
               return await interaction.followUp({
                 content: 'Channel not found',
-                ephemeral: true,
+                ephemeral: true
               });
             }
             if ((channel as TextChannel).parentId !== supportCategory) {
               return await interaction.followUp({
                 content: 'Tags can only be sent in support channels',
-                ephemeral: true,
+                ephemeral: true
               });
             }
             const message = await (channel as TextChannel).messages.fetch(split[2]);
             if (!message) {
               return await interaction.followUp({
                 content: 'Message not found',
-                ephemeral: true,
+                ephemeral: true
               });
             }
             message.reply({
               content: user
                 ? `${user.toString()}\n\n${(inputTag.tag as TagType).content}`
-                : (inputTag.tag as TagType).content,
+                : (inputTag.tag as TagType).content
             });
           } else {
             if ((interaction.channel as TextChannel).parentId !== supportCategory) {
               return await interaction.followUp({
                 content: 'Tags can only be sent in support channels',
-                ephemeral: true,
+                ephemeral: true
               });
             }
             (interaction.channel as TextChannel).send({
               content: user
                 ? `${user.toString()}\n\n${(inputTag.tag as TagType).content}`
-                : (inputTag.tag as TagType).content,
+                : (inputTag.tag as TagType).content
             });
           }
 
-          const embed = new EmbedBuilder()
-            .setTitle('Tag sent')
-            .setDescription(`Tag \`${name}\` sent`);
+          const embed = new EmbedBuilder().setTitle('Tag sent').setDescription(`Tag \`${name}\` sent`);
           return await interaction.followUp({ embeds: [embed] });
-        } else {
-          return await interaction.reply({
-            content: 'Tag not found',
-            ephemeral: true,
-          });
         }
+        return await interaction.reply({
+          content: 'Tag not found',
+          ephemeral: true
+        });
       }
       default: {
         const embed = new EmbedBuilder()
@@ -251,13 +237,12 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
     if (interaction.replied || interaction.deferred) {
       return await interaction.followUp({
         content: 'Something went wrong. Please try again later.',
-        ephemeral: true,
-      });
-    } else {
-      return await interaction.reply({
-        content: 'Something went wrong. Please try again later.',
-        ephemeral: true,
+        ephemeral: true
       });
     }
+    return await interaction.reply({
+      content: 'Something went wrong. Please try again later.',
+      ephemeral: true
+    });
   }
 };

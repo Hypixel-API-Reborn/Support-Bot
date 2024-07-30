@@ -2,7 +2,7 @@ import { Collection, SlashCommandBuilder, ChatInputCommandInteraction } from 'di
 
 export interface SlashCommand {
   command: SlashCommandBuilder | any;
-  // eslint-disable-next-line no-unused-vars
+
   execute: (interaction: ChatInputCommandInteraction) => void;
 }
 
