@@ -67,11 +67,14 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           .setTimestamp()
           .setColor(0xff8c00)
           .setDescription(
-            `<@${user.id}>\n\nBot: ${user.user.bot}\nID: ${user.id}\n Created: <t:${
-              user.user.createdTimestamp
-            }:F> (<t:${user.user.createdTimestamp}:R>)\nJoined: <t:${
-              user.joinedTimestamp
-            }:F> (<t:${user.joinedTimestamp}:R>)\nRoles: ${user.roles.cache.map((role) => `<@&${role.id}>`)}`
+            `<@${user.id}>\n\nBot: ${user.user.bot}\nID: ${user.id}\n Created: <t:${Math.floor(
+              user.user.createdTimestamp / 1000
+            )}:F> (<t:${Math.floor(user.user.createdTimestamp / 1000)}:R>)\nJoined: <t:${Math.floor(
+              (user.joinedTimestamp ?? 0) / 1000
+            )}:F> (<t:${Math.floor((user.joinedTimestamp ?? 0) / 1000)}:R>)\nRoles: ${user.roles.cache
+              .map((role) => `<@&${role.id}>`)
+              .filter((role) => role !== `<@&${interaction.guild?.id}>`)
+              .join(', ')}`
           );
         await interaction.reply({
           embeds: [embed],
@@ -84,7 +87,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           ],
           ephemeral: true
         });
-        await interaction.reply({ content: `<@${user.id}> has been warned`, ephemeral: true });
+        break;
       }
       case 'infractions': {
         const userInfractions = await getUserInfractions(commandUser.id);
@@ -102,6 +105,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           .setColor(0xff8c00)
           .setTimestamp();
         await interaction.reply({ embeds: [embed], ephemeral: true });
+        break;
       }
       case 'warn': {
         const reason = interaction.options.getString('reason') || 'No reason provided';
@@ -115,6 +119,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           .log()
           .save();
         await interaction.reply({ content: `<@${commandUser.id}> has been warned`, ephemeral: true });
+        break;
       }
       case 'kick': {
         const reason = interaction.options.getString('reason') || 'No reason provided';
@@ -128,6 +133,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           .log()
           .save();
         await interaction.reply({ content: `<@${commandUser.id}> has been kicked`, ephemeral: true });
+        break;
       }
       default: {
         await interaction.reply({ content: 'Invalid subcommand Please provide a valid subcommand', ephemeral: true });

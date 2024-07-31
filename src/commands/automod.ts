@@ -96,6 +96,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             });
           }
         }
+        break;
       }
       default: {
         await interaction.reply({ content: 'Invalid subcommand Please provide a valid subcommand', ephemeral: true });

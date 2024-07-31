@@ -1,5 +1,5 @@
-import { ChannelType } from 'discord.js';
 import { infractionLogchannel } from '../../config.json';
+import { ChannelType } from 'discord.js';
 import { model, Schema } from 'mongoose';
 
 export interface InfractionUser {
@@ -81,9 +81,11 @@ class Infraction {
     return this.infraction.automatic;
   }
   public toString(): string {
-    return `Infraction: ${this.infraction.reason}\nAutomatic: ${this.infraction.automatic ? 'Yes' : 'No'}\nUser: <@${
-      this.infraction.user.id
-    }>\nStaff: ${this.infraction.staff ? `<@${this.infraction.staff.id}>` : 'None'}`;
+    return `Infraction: ${this.infraction.reason}\nType: ${this.infraction.type}\nAutomatic: ${
+      this.infraction.automatic ? 'Yes' : 'No'
+    }\nUser: <@${this.infraction.user.id}>\nStaff: ${
+      this.infraction.staff ? `<@${this.infraction.staff.id}>` : 'None'
+    }`;
   }
   public log(): this {
     const channel = guild.channels.cache.get(infractionLogchannel);

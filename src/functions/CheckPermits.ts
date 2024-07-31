@@ -1,9 +1,8 @@
 import { autoModBypassRole } from '../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
 import { UserPermit } from '../commands/automod';
-import { Client } from 'discord.js';
 
-export default async function CheckPermits(client: Client) {
+export default function CheckPermits() {
   const permitData = readFileSync('data/permit.json');
   if (!permitData) return;
   const permit = JSON.parse(permitData.toString());

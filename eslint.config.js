@@ -1,6 +1,5 @@
 import prettier from 'eslint-config-prettier';
 import ts from 'typescript-eslint';
-import { Guild } from 'discord.js';
 import globals from 'globals';
 
 export default [
@@ -14,7 +13,7 @@ export default [
       globals: {
         ...globals.es2022,
         ...globals.node,
-        guild: Guild
+        guild: 'writable'
       }
     },
     rules: {
@@ -46,6 +45,7 @@ export default [
       'default-case-last': 'warn',
       'no-self-compare': 'error',
       'no-new-wrappers': 'error',
+      'no-fallthrough': 'error',
       'no-lone-blocks': 'error',
       'no-undef-init': 'error',
       'no-else-return': 'warn',
