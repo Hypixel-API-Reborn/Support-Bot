@@ -1,6 +1,6 @@
 import { serverId, autoModBypassRole } from '../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
-import { Permit } from '../commands/automod';
+import { UserPermit } from '../commands/automod';
 import { Client } from 'discord.js';
 
 export default async function CheckPermits(client: Client) {
@@ -9,9 +9,8 @@ export default async function CheckPermits(client: Client) {
   if (!permitData) return;
   const permit = JSON.parse(permitData.toString());
   if (!permit) return;
-
   const currentTime = Math.floor(new Date().getTime() / 1000);
-  permit.forEach((user: Permit) => {
+  permit.forEach((user: UserPermit) => {
     if (user.removeTime < currentTime) {
       const guildMember = guild.members.cache.get(user.id);
       if (guildMember) {
@@ -20,6 +19,5 @@ export default async function CheckPermits(client: Client) {
       permit.splice(permit.indexOf(user), 1);
     }
   });
-
   writeFileSync('data/permit.json', JSON.stringify(permit));
 }

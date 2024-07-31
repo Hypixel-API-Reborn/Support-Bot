@@ -3,24 +3,17 @@ import { mongoURL } from '../../config.json';
 
 export function connectDB(): void {
   connect(mongoURL).then(() => {
-    // eslint-disable-next-line no-console
     console.log('Connected to MongoDB');
   });
 }
-
 export interface TagType {
   content: string;
   status: string;
   name: string;
   id: string;
 }
-const tagSchema = new Schema({
-  content: String,
-  status: String,
-  name: String,
-  id: String
-});
 
+const tagSchema = new Schema({ content: String, status: String, name: String, id: String });
 const TagModel = model('Tag', tagSchema);
 
 export class Tag {
@@ -34,14 +27,8 @@ export class Tag {
     this.id = id;
     this.status = status;
   }
-
   save() {
-    new TagModel({
-      content: this.content,
-      status: this.status,
-      name: this.name,
-      id: this.id
-    }).save();
+    new TagModel({ content: this.content, status: this.status, name: this.name, id: this.id }).save();
   }
 }
 

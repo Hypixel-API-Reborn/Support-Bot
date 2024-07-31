@@ -2,7 +2,7 @@ import {
   ModalActionRowComponentBuilder,
   ChatInputCommandInteraction,
   AutocompleteInteraction,
-  GuildMemberRoleManager,
+  PermissionFlagsBits,
   SlashCommandBuilder,
   TextInputBuilder,
   ActionRowBuilder,
@@ -11,8 +11,8 @@ import {
   EmbedBuilder,
   ChannelType
 } from 'discord.js';
-import { contributorsRole, teamRole, devRole, supportCategory } from '../../config.json';
 import { deleteTag, getTag, getTagNames } from '../functions/mongo';
+import { supportCategory } from '../../config.json';
 
 export const data = new SlashCommandBuilder()
   .setName('tag')
@@ -47,7 +47,9 @@ export const data = new SlashCommandBuilder()
       .addStringOption((option) =>
         option.setName('message-link').setDescription('The Message link to reply with the tag').setRequired(false)
       )
-  );
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+  .setDMPermission(false);
 
 export async function autoComplete(interaction: AutocompleteInteraction): Promise<void> {
   const focusedOption = interaction.options.getFocused(true);
@@ -71,88 +73,55 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
   try {
     if (!interaction.member) return;
     const subCommand = interaction.options.getSubcommand();
-    const memberRoles = (interaction.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     switch (subCommand) {
       case 'add': {
-        if (memberRoles.some((role) => [contributorsRole, teamRole, devRole].includes(role))) {
-          const modal = new ModalBuilder().setCustomId('tagForm').setTitle('Please enter the tag information');
-
-          const tagFormName = new TextInputBuilder()
-            .setStyle(TextInputStyle.Short)
-            .setCustomId('tagFormName')
-            .setRequired(true)
-            .setLabel('Name');
-
-          const tagFormContent = new TextInputBuilder()
-            .setStyle(TextInputStyle.Paragraph)
-            .setCustomId('tagFormContent')
-            .setLabel('Tag Content')
-            .setRequired(true);
-
-          const tagFormNameReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
-          const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-            tagFormContent
-          );
-          modal.addComponents(tagFormNameReason, tagFormContentReason);
-          await interaction.showModal(modal);
-        } else {
-          await interaction.reply({
-            content: 'You do not have permission to use this command',
-            ephemeral: true
-          });
-        }
+        const modal = new ModalBuilder().setCustomId('tagForm').setTitle('Please enter the tag information');
+        const tagFormName = new TextInputBuilder()
+          .setStyle(TextInputStyle.Short)
+          .setCustomId('tagFormName')
+          .setRequired(true)
+          .setLabel('Name');
+        const tagFormContent = new TextInputBuilder()
+          .setStyle(TextInputStyle.Paragraph)
+          .setCustomId('tagFormContent')
+          .setLabel('Tag Content')
+          .setRequired(true);
+        const tagFormNameReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
+        const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+          tagFormContent
+        );
+        modal.addComponents(tagFormNameReason, tagFormContentReason);
+        await interaction.showModal(modal);
         break;
       }
       case 'edit': {
         let name = interaction.options.getString('name');
         if (!name) return;
         name = name.toLowerCase();
-        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
-          const modal = new ModalBuilder()
-            .setCustomId(`t.e.${name}`)
-            .setTitle('Please enter the updated tag information');
-
-          const tagFormContent = new TextInputBuilder()
-            .setStyle(TextInputStyle.Paragraph)
-            .setCustomId('tagFormUpdatedContent')
-            .setLabel('New Tag Content')
-            .setRequired(true);
-
-          const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-            tagFormContent
-          );
-          modal.addComponents(tagFormContentReason);
-          await interaction.showModal(modal);
-        } else {
-          await interaction.reply({
-            content: 'You do not have permission to use this command',
-            ephemeral: true
-          });
-        }
+        const modal = new ModalBuilder()
+          .setCustomId(`t.e.${name}`)
+          .setTitle('Please enter the updated tag information');
+        const tagFormContent = new TextInputBuilder()
+          .setStyle(TextInputStyle.Paragraph)
+          .setCustomId('tagFormUpdatedContent')
+          .setLabel('New Tag Content')
+          .setRequired(true);
+        const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+          tagFormContent
+        );
+        modal.addComponents(tagFormContentReason);
+        await interaction.showModal(modal);
         break;
       }
       case 'delete': {
-        if (memberRoles.some((role) => [teamRole, devRole].includes(role))) {
-          const name = interaction.options.getString('name');
-          if (!name) return;
-          const inputTag = await deleteTag(name.toLowerCase());
-          if (inputTag.success) {
-            await interaction.reply({
-              content: 'Tag deleted successfully',
-              ephemeral: true
-            });
-            return;
-          }
-          await interaction.reply({
-            content: 'Tag not found',
-            ephemeral: true
-          });
+        const name = interaction.options.getString('name');
+        if (!name) return;
+        const inputTag = await deleteTag(name.toLowerCase());
+        if (inputTag.success) {
+          await interaction.reply({ content: 'Tag deleted successfully', ephemeral: true });
           return;
         }
-        await interaction.reply({
-          content: 'You do not have permission to use this command',
-          ephemeral: true
-        });
+        await interaction.reply({ content: 'Tag not found', ephemeral: true });
         return;
       }
       case 'send': {
@@ -161,89 +130,58 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         let messageLink = interaction.options.getString('message-link') || null;
         const user = interaction.options.getUser('user');
         const inputTag = await getTag(name.toLowerCase());
-        if (inputTag.success) {
-          if (!inputTag.tag?.status) return;
-          await interaction.deferReply({ ephemeral: true });
-          if (messageLink) {
-            if (!messageLink.includes('discord.com/channels/')) {
-              await interaction.followUp({
-                content: 'Invalid message link',
-                ephemeral: true
-              });
-              return;
-            }
-            if (!messageLink.includes('https://')) {
-              await interaction.followUp({
-                content: 'Invalid message link',
-                ephemeral: true
-              });
-              return;
-            }
-            if (messageLink.startsWith('https://canary.discord.com')) {
-              messageLink = messageLink.replace('canary.', '');
-            }
-            if (messageLink.startsWith('https://ptb.discord.com')) {
-              messageLink = messageLink.replace('ptb.', '');
-            }
-            const split = messageLink.split('https://discord.com/channels/')[1].split('/');
-            const channel = await interaction.client.channels.fetch(split[1]);
-            if (!channel) {
-              await interaction.followUp({
-                content: 'Channel not found',
-                ephemeral: true
-              });
-              return;
-            }
-            if (channel.type !== ChannelType.GuildText) {
-              await interaction.followUp({
-                content: 'Invalid channel type',
-                ephemeral: true
-              });
-              return;
-            }
-            if (channel.parentId !== supportCategory) {
-              await interaction.followUp({
-                content: 'Tags can only be sent in support channels',
-                ephemeral: true
-              });
-              return;
-            }
-            const message = await channel.messages.fetch(split[2]);
-            if (!message) {
-              await interaction.followUp({
-                content: 'Message not found',
-                ephemeral: true
-              });
-              return;
-            }
-            message.reply({
-              content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content
-            });
-          } else {
-            if (!interaction.channel) return;
-            if (interaction.channel.type !== ChannelType.GuildText) {
-              return;
-            }
-            if (interaction.channel.parentId !== supportCategory) {
-              await interaction.followUp({
-                content: 'Tags can only be sent in support channels',
-                ephemeral: true
-              });
-              return;
-            }
-            interaction.channel.send({
-              content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content
-            });
+        if (!inputTag.success) await interaction.reply({ content: 'Tag not found', ephemeral: true });
+        if (!inputTag.tag?.status) return;
+        await interaction.deferReply({ ephemeral: true });
+        if (messageLink) {
+          if (!messageLink.includes('discord.com/channels/')) {
+            await interaction.followUp({ content: 'Invalid message link', ephemeral: true });
+            return;
           }
-
-          const embed = new EmbedBuilder().setTitle('Tag sent').setDescription(`Tag \`${name}\` sent`);
-          await interaction.followUp({ embeds: [embed] });
-          return;
+          if (!messageLink.includes('https://')) {
+            await interaction.followUp({ content: 'Invalid message link', ephemeral: true });
+            return;
+          }
+          if (messageLink.startsWith('https://canary.discord.com')) {
+            messageLink = messageLink.replace('canary.', '');
+          }
+          if (messageLink.startsWith('https://ptb.discord.com')) {
+            messageLink = messageLink.replace('ptb.', '');
+          }
+          const split = messageLink.split('https://discord.com/channels/')[1].split('/');
+          const channel = await interaction.client.channels.fetch(split[1]);
+          if (!channel) {
+            await interaction.followUp({ content: 'Channel not found', ephemeral: true });
+            return;
+          }
+          if (channel.type !== ChannelType.GuildText) {
+            await interaction.followUp({ content: 'Invalid channel type', ephemeral: true });
+            return;
+          }
+          if (channel.parentId !== supportCategory) {
+            await interaction.followUp({ content: 'Tags can only be sent in support channels', ephemeral: true });
+            return;
+          }
+          const message = await channel.messages.fetch(split[2]);
+          if (!message) {
+            await interaction.followUp({ content: 'Message not found', ephemeral: true });
+            return;
+          }
+          message.reply({ content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content });
+        } else {
+          if (!interaction.channel) return;
+          if (interaction.channel.type !== ChannelType.GuildText) {
+            return;
+          }
+          if (interaction.channel.parentId !== supportCategory) {
+            await interaction.followUp({ content: 'Tags can only be sent in support channels', ephemeral: true });
+            return;
+          }
+          interaction.channel.send({
+            content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content
+          });
         }
-        await interaction.reply({
-          content: 'Tag not found',
-          ephemeral: true
-        });
+        await interaction.followUp({ content: `Tag \`${name}\` sent` });
         return;
       }
       default: {
@@ -254,18 +192,11 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       }
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log(error);
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: 'Something went wrong. Please try again later.',
-        ephemeral: true
-      });
+      await interaction.followUp({ content: 'Something went wrong. Please try again later.', ephemeral: true });
       return;
     }
-    await interaction.reply({
-      content: 'Something went wrong. Please try again later.',
-      ephemeral: true
-    });
+    await interaction.reply({ content: 'Something went wrong. Please try again later.', ephemeral: true });
   }
 }

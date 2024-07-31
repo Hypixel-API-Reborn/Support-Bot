@@ -24,18 +24,11 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     );
     await interaction.reply({ embeds: [docs.resolveEmbed(query)] });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log(error);
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: 'Something went wrong. Please try again later.',
-        ephemeral: true
-      });
+      await interaction.followUp({ content: 'Something went wrong. Please try again later.', ephemeral: true });
       return;
     }
-    await interaction.reply({
-      content: 'Something went wrong. Please try again later.',
-      ephemeral: true
-    });
+    await interaction.reply({ content: 'Something went wrong. Please try again later.', ephemeral: true });
   }
 }
