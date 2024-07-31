@@ -11,7 +11,7 @@ export async function execute(client: Client): Promise<void> {
     DeployEvents(client);
     connectDB();
     global.guild = await client.guilds.fetch(serverId);
-    cron.schedule(`* * * * *`, () => CheckPermits(client));
+    cron.schedule(`* * * * *`, () => CheckPermits());
   } catch (error) {
     console.log(error);
   }
