@@ -6,5 +6,6 @@
   "contributorsRole": "CONTRIBUTORS_ROLE_ID",
   "supportCategory": "SUPPORT_CATEGORY_ID",
   "autoModBypassRole": "AUTOMOD_BYPASS_ROLE_ID",
-  "serverId": "SERVER_ID"
+  "serverId": "SERVER_ID",
+  "infractionLogchannel": "INFRACTION_LOG_CHANNEL"
 }

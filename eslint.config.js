@@ -1,5 +1,6 @@
 import prettier from 'eslint-config-prettier';
 import ts from 'typescript-eslint';
+import { Guild } from 'discord.js';
 import globals from 'globals';
 
 export default [
@@ -12,7 +13,8 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.es2022,
-        ...globals.node
+        ...globals.node,
+        guild: Guild
       }
     },
     rules: {
