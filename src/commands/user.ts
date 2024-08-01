@@ -7,7 +7,7 @@ import {
   EmbedBuilder,
   ButtonStyle
 } from 'discord.js';
-import Infraction, { getUserInfractions } from '../functions/Infraction';
+import Infraction, { getUserInfractions } from '../utils/Infraction';
 import ms from 'ms';
 
 export const data = new SlashCommandBuilder()
@@ -58,7 +58,6 @@ export const data = new SlashCommandBuilder()
       .setName('unmute')
       .setDescription('unmute a user')
       .addUserOption((option) => option.setName('user').setDescription('The user to mute').setRequired(true))
-      .addStringOption((option) => option.setName('time').setDescription('How long to mute').setRequired(true))
       .addStringOption((option) =>
         option.setName('reason').setDescription('The reason for the mute').setRequired(false)
       )
@@ -136,7 +135,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           long: null,
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          extraInfo: ''
         })
           .log()
           .save();
@@ -152,7 +152,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           long: null,
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          extraInfo: ''
         })
           .log()
           .save();
@@ -179,7 +180,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           long,
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          extraInfo: ''
         })
           .log()
           .save();
@@ -196,7 +198,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           long: null,
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          extraInfo: ''
         })
           .log()
           .save();

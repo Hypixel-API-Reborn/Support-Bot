@@ -1,6 +1,7 @@
 import { infractionLogchannel } from '../../config.json';
-import { ChannelType } from 'discord.js';
+import { ChannelType, EmbedBuilder } from 'discord.js';
 import { model, Schema } from 'mongoose';
+import ms from 'ms';
 
 export interface InfractionUser {
   id: string;
@@ -8,7 +9,7 @@ export interface InfractionUser {
   bot: boolean;
 }
 
-export type InfractionType = 'EVENT' | 'WARN' | 'KICK' | 'BAN' | 'MUTE' | 'UNMUTE';
+export type InfractionType = 'AutoMod' | 'WARN' | 'KICK' | 'BAN' | 'MUTE' | 'UNMUTE';
 
 export interface InfractionInfomation {
   automatic: boolean;
@@ -18,6 +19,7 @@ export interface InfractionInfomation {
   user: InfractionUser;
   staff: InfractionUser;
   timestamp: number;
+  extraInfo: string;
 }
 
 const InteractionUserSchema = new Schema({ id: String, staff: Boolean, bot: Boolean });
@@ -31,7 +33,8 @@ const InfractionSchema = new Schema({
   type: String,
   user: InteractionUserSchema,
   staff: InteractionUserSchema,
-  timestamp: Number
+  timestamp: Number,
+  extraInfo: String
 });
 const InfractionModel = model('infraction', InfractionSchema);
 
@@ -49,7 +52,8 @@ class Infraction {
       type: this.infraction.type,
       user: this.infraction.user,
       staff: this.infraction.staff,
-      timestamp: this.infraction.timestamp
+      timestamp: this.infraction.timestamp,
+      extraInfo: this.infraction.extraInfo
     }).save();
   }
 
@@ -88,6 +92,11 @@ class Infraction {
     return this;
   }
 
+  public setExtraInfo(extraInfo: string): this {
+    this.infraction.extraInfo = extraInfo;
+    return this;
+  }
+
   public getAutomatic(): boolean {
     return this.infraction.automatic;
   }
@@ -116,6 +125,10 @@ class Infraction {
     return this.infraction.timestamp;
   }
 
+  public getExtraInfo(): string {
+    return this.infraction.extraInfo;
+  }
+
   public toString(): string {
     return `Infraction: ${this.infraction.reason}\nType: ${this.infraction.type}\nLong: ${
       this.infraction.long
@@ -129,7 +142,24 @@ class Infraction {
   public log(): this {
     const channel = guild.channels.cache.get(infractionLogchannel);
     if (!channel || channel.type !== ChannelType.GuildText) return this;
-    channel.send(this.toString());
+    const embed = new EmbedBuilder()
+      .setColor('#FF8C00')
+      .setTitle(`Infraction | ${this.infraction.type}`)
+      .addFields(
+        { name: 'User', value: `<@${this.infraction.user.id}>` },
+        { name: 'Reason', value: this.infraction.reason },
+        { name: 'Staff', value: `<@${this.infraction.staff.id}>` },
+        { name: 'Automatic', value: this.infraction.automatic ? 'Yes' : 'No' },
+        {
+          name: 'Timestamp',
+          value: `<t:${Math.floor(this.infraction.timestamp / 1000)}:t> (<t:${Math.floor(
+            this.infraction.timestamp / 1000
+          )}:R>)`
+        }
+      );
+    if (0 < this.infraction.extraInfo.length) embed.addFields({ name: 'Info', value: this.infraction.extraInfo });
+    if (this.infraction.long) embed.addFields({ name: 'How long', value: `${ms(86400000, { long: true })}` });
+    channel.send({ embeds: [embed] });
     return this;
   }
 }

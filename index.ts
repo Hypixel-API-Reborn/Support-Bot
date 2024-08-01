@@ -1,6 +1,6 @@
 import { Client, Events, GatewayIntentBits } from 'discord.js';
-import DeployCommands from './src/functions/DeployCommands';
-import { execute } from './src/events/ready';
+import DeployCommands from './src/utils/DeployCommands';
+import ready from './src/events/ready';
 import { token } from './config.json';
 
 const client: Client = new Client({
@@ -15,7 +15,7 @@ const client: Client = new Client({
 DeployCommands(client);
 
 client.on(Events.ClientReady, () => {
-  execute(client);
+  ready(client);
 });
 
 client.login(token);

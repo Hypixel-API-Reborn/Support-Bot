@@ -11,7 +11,7 @@ import {
   EmbedBuilder,
   ChannelType
 } from 'discord.js';
-import { deleteTag, getTag, getTagNames } from '../functions/mongo';
+import { deleteTag, getTag, getTagNames } from '../utils/mongo';
 import { supportCategory } from '../../config.json';
 
 export const data = new SlashCommandBuilder()

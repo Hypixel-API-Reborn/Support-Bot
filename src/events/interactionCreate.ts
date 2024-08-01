@@ -1,9 +1,9 @@
-import { Interaction, Events, InteractionType, GuildMemberRoleManager } from 'discord.js';
+import { Interaction, InteractionType, GuildMemberRoleManager } from 'discord.js';
 import { teamRole, devRole } from '../../config.json';
-import { Tag, modifyTag } from '../functions/mongo';
-import { eventMessage } from '../functions/logger';
-export const name = Events.InteractionCreate;
-export async function execute(interaction: Interaction): Promise<void> {
+import { Tag, modifyTag } from '../utils/mongo';
+import { eventMessage } from '../utils/logger';
+
+export default async function (interaction: Interaction): Promise<void> {
   try {
     if (!interaction.member || !interaction.channel || !interaction.guild) return;
     const memberRoles = (interaction.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);

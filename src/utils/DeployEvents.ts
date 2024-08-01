@@ -13,7 +13,7 @@ export default async function (client: Client): Promise<void> {
       }
       const event = await import(`../events/${file}`);
       const name = file.split('.')[0];
-      client.on(name, event.execute.bind(null));
+      client.on(name, event.default.bind(null));
       eventMessage(`Successfully loaded ${name}`);
     }
     eventMessage(`Successfully loaded ${count} event(s).`);

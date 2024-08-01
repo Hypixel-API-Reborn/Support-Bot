@@ -1,11 +1,12 @@
-import CheckPermits from '../functions/CheckPermits';
-import DeployEvents from '../functions/DeployEvents';
-import { eventMessage } from '../functions/logger';
-import { connectDB } from '../functions/mongo';
+import CheckPermits from '../utils/CheckPermits';
+import DeployEvents from '../utils/DeployEvents';
+import { eventMessage } from '../utils/logger';
+import { connectDB } from '../utils/mongo';
 import { serverId } from '../../config.json';
 import { Client } from 'discord.js';
 import cron from 'node-cron';
-export async function execute(client: Client): Promise<void> {
+
+export default async function (client: Client): Promise<void> {
   try {
     eventMessage(`Logged in as ${client.user?.username} (${client.user?.id})!`);
     DeployEvents(client);
