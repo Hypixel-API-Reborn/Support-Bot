@@ -28,6 +28,7 @@ export const data = new SlashCommandBuilder()
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
   .setDMPermission(false);
+
 export interface UserPermit {
   id: string;
   removeTime: number;

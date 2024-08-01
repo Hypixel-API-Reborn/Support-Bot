@@ -1,4 +1,3 @@
-// MAX MUTE TIME 2419200000
 import {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
@@ -9,6 +8,7 @@ import {
   ButtonStyle
 } from 'discord.js';
 import Infraction, { getUserInfractions } from '../functions/Infraction';
+import ms from 'ms';
 
 export const data = new SlashCommandBuilder()
   .setName('user')
@@ -41,6 +41,26 @@ export const data = new SlashCommandBuilder()
       .addUserOption((option) => option.setName('user').setDescription('The user to kick').setRequired(true))
       .addStringOption((option) =>
         option.setName('reason').setDescription('The reason for the kick').setRequired(false)
+      )
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('mute')
+      .setDescription('Mute a user')
+      .addUserOption((option) => option.setName('user').setDescription('The user to mute').setRequired(true))
+      .addStringOption((option) => option.setName('time').setDescription('How long to mute').setRequired(true))
+      .addStringOption((option) =>
+        option.setName('reason').setDescription('The reason for the mute').setRequired(false)
+      )
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName('unmute')
+      .setDescription('unmute a user')
+      .addUserOption((option) => option.setName('user').setDescription('The user to mute').setRequired(true))
+      .addStringOption((option) => option.setName('time').setDescription('How long to mute').setRequired(true))
+      .addStringOption((option) =>
+        option.setName('reason').setDescription('The reason for the mute').setRequired(false)
       )
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
@@ -113,8 +133,10 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           automatic: false,
           reason: reason,
           type: 'WARN',
+          long: null,
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
-          staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot }
+          staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+          timestamp: Date.now()
         })
           .log()
           .save();
@@ -127,12 +149,58 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           automatic: false,
           reason: reason,
           type: 'KICK',
+          long: null,
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
-          staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot }
+          staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+          timestamp: Date.now()
         })
           .log()
           .save();
         await interaction.reply({ content: `<@${commandUser.id}> has been kicked`, ephemeral: true });
+        break;
+      }
+      case 'mute': {
+        const time = interaction.options.getString('time');
+        const reason = interaction.options.getString('reason') || 'No reason provided';
+        if (!time) {
+          await interaction.reply({ content: 'Please provide a time', ephemeral: true });
+          return;
+        }
+        const long = ms(time);
+        if (2419200000 < long) {
+          await interaction.reply({ content: 'You cannot mute someone for longer then 28d', ephemeral: true });
+          return;
+        }
+        user.timeout(long, reason);
+        new Infraction({
+          automatic: false,
+          reason: reason,
+          type: 'MUTE',
+          long,
+          user: { id: commandUser.id, staff: false, bot: commandUser.bot },
+          staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+          timestamp: Date.now()
+        })
+          .log()
+          .save();
+        await interaction.reply({ content: `<@${commandUser.id}> has been muted`, ephemeral: true });
+        break;
+      }
+      case 'unmute': {
+        const reason = interaction.options.getString('reason') || 'No reason provided';
+        user.timeout(null, reason);
+        new Infraction({
+          automatic: false,
+          reason: reason,
+          type: 'UNMUTE',
+          long: null,
+          user: { id: commandUser.id, staff: false, bot: commandUser.bot },
+          staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+          timestamp: Date.now()
+        })
+          .log()
+          .save();
+        await interaction.reply({ content: `<@${commandUser.id}> has been unmuted`, ephemeral: true });
         break;
       }
       default: {
