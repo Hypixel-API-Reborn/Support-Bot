@@ -25,9 +25,8 @@ function isUrlAllowed(url: string): boolean {
       allowedDomains.some((pattern) => pattern === `*.${domain}`) ||
       allowedDomains.some((pattern) => pattern === match[2] + domain)
     );
-  } else {
-    return false;
   }
+  return false;
 }
 
 async function getWebhook(
