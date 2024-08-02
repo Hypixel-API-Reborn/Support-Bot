@@ -18,9 +18,7 @@ function isUrlAllowed(url: string): boolean {
 
   if (allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
     return true;
-  } else if (!allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
-    return allowedDomains.some((pattern) => pattern === `*.${domain}`);
-  } else if (!allowedDomains.some((pattern) => pattern === domain) && match[2]) {
+  } else if (!allowedDomains.some((pattern) => pattern === domain)) {
     return (
       allowedDomains.some((pattern) => pattern === `*.${domain}`) ||
       allowedDomains.some((pattern) => pattern === match[2] + domain)
