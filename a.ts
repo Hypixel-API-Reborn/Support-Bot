@@ -1,36 +1,33 @@
 const urlRegex =
-  /https?:\/\/(www\.)?([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b)([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+  /https?:\/\/(www\.)?([-a-zA-Z0-9]{1,63}\.)*([-a-zA-Z0-9]{1,63}\.[a-zA-Z]{2,6})([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/;
 
 const allowedDomains: string[] = [
-  'hypixel.net',
   '*.hypixel.net',
-  'discord.com',
   '*.discord.com',
-  'kath.lol',
   '*.kathund.wtf',
-  'kathund.wtf',
+  'kath.lol',
   'hypixel-api-reborn.github.io'
 ];
 
-function matchWildcard(domain: string, pattern: string): boolean {
-  const regexPattern = pattern.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '.*');
-  const regex = new RegExp(`^${regexPattern}$`);
-  return regex.test(domain);
-}
-
 function isUrlAllowed(url: string): boolean {
   const isValidUrl = urlRegex.test(url);
-  if (!isValidUrl) {
-    return false;
-  }
-
+  if (!isValidUrl) return false;
   const match = url.match(urlRegex);
-  const domain = match ? match[2] : null;
-  if (!domain) {
+  if (!match) return false;
+  const domain: string = match[3];
+
+  if (allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
+    return true;
+  } else if (!allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
+    return allowedDomains.some((pattern) => pattern === `*.${domain}`);
+  } else if (!allowedDomains.some((pattern) => pattern === domain) && match[2]) {
+    return (
+      allowedDomains.some((pattern) => pattern === `*.${domain}`) ||
+      allowedDomains.some((pattern) => pattern === match[2] + domain)
+    );
+  } else {
     return false;
   }
-
-  return allowedDomains.some((pattern) => matchWildcard(domain, pattern));
 }
 
 const testUrls = [
