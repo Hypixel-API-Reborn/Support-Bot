@@ -1,53 +1,24 @@
 import { ChannelType, GuildMemberRoleManager, Message, TextChannel, Webhook, WebhookType } from 'discord.js';
-import { autoModBypassRole } from '../../config.json';
-import Infraction from '../utils/Infraction';
 import { DiscordInviteRegex, HypixelAPIKeyRegex, IPAddressPattern, URLRegex } from '../utils/regex';
+import { autoModBypassRole } from '../../config.json';
+import DiscordManager from '../DiscordManager';
+import Infraction from '../utils/Infraction';
 
-const allowedDomains: string[] = [
-  '*.hypixel.net',
-  '*.discord.com',
-  '*.kathund.wtf',
-  'kath.lol',
-  'hypixel-api-reborn.github.io'
-];
-
-function isUrlAllowed(url: string): boolean {
-  const isValidUrl = URLRegex.test(url);
-  if (!isValidUrl) return false;
-  const match = url.match(URLRegex);
-  if (!match) return false;
-  const domain: string = match[3];
-
-  if (allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
-    return true;
-  } else if (!allowedDomains.some((pattern) => pattern === domain)) {
-    return (
-      allowedDomains.some((pattern) => pattern === `*.${domain}`) ||
-      allowedDomains.some((pattern) => pattern === match[2] + domain)
-    );
-  }
-  return false;
-}
-
-async function getWebhook(
-  channel: TextChannel
-): Promise<Webhook<WebhookType.ChannelFollower | WebhookType.Incoming> | undefined> {
-  const webhooks = await channel.fetchWebhooks();
-
-  if (0 === webhooks.size) {
-    channel.createWebhook({
-      name: channel.client.user.globalName ?? channel.client.user.username,
-      avatar: channel.client.user.avatarURL()
-    });
-
-    await getWebhook(channel);
+class MessageHandler {
+  discord: DiscordManager;
+  allowedDomains: string[];
+  constructor(discordManager: DiscordManager) {
+    this.discord = discordManager;
+    this.allowedDomains = [
+      '*.hypixel.net',
+      '*.discord.com',
+      '*.kathund.wtf',
+      'kath.lol',
+      'hypixel-api-reborn.github.io'
+    ];
   }
 
-  return webhooks.first();
-}
-
-export default async function (message: Message): Promise<void> {
-  try {
+  async onMessage(message: Message) {
     if (
       message.channel.type !== ChannelType.GuildText ||
       message.author.bot ||
@@ -57,13 +28,14 @@ export default async function (message: Message): Promise<void> {
     ) {
       return;
     }
+
     const memberRoles = (message.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     if (memberRoles.includes(autoModBypassRole)) return;
     const hypixelKeyTest = HypixelAPIKeyRegex.test(message.content);
     const ipTest = IPAddressPattern.test(message.content);
-    const urlTest = isUrlAllowed(message.content);
+    const urlTest = this.isUrlAllowed(message.content);
     const discordTest = DiscordInviteRegex.test(message.content);
-    const webhook = await getWebhook(message.channel);
+    const webhook = await this.getWebhook(message.channel);
     if (!webhook) return;
     if (hypixelKeyTest) {
       const filteredContent = message.content.replace(HypixelAPIKeyRegex, '[API Key Removed]');
@@ -111,7 +83,42 @@ export default async function (message: Message): Promise<void> {
         .log()
         .save();
     }
-  } catch (error) {
-    console.log(error);
+  }
+
+  async getWebhook(
+    channel: TextChannel
+  ): Promise<Webhook<WebhookType.ChannelFollower | WebhookType.Incoming> | undefined> {
+    const webhooks = await channel.fetchWebhooks();
+
+    if (0 === webhooks.size) {
+      channel.createWebhook({
+        name: channel.client.user.globalName ?? channel.client.user.username,
+        avatar: channel.client.user.avatarURL()
+      });
+
+      await this.getWebhook(channel);
+    }
+
+    return webhooks.first();
+  }
+
+  isUrlAllowed(url: string): boolean {
+    const isValidUrl = URLRegex.test(url);
+    if (!isValidUrl) return false;
+    const match = url.match(URLRegex);
+    if (!match) return false;
+    const domain: string = match[3];
+
+    if (this.allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
+      return true;
+    } else if (!this.allowedDomains.some((pattern) => pattern === domain)) {
+      return (
+        this.allowedDomains.some((pattern) => pattern === `*.${domain}`) ||
+        this.allowedDomains.some((pattern) => pattern === match[2] + domain)
+      );
+    }
+    return false;
   }
 }
+
+export default MessageHandler;
