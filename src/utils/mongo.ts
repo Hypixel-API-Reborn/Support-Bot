@@ -1,4 +1,5 @@
 import { Schema, connect, model } from 'mongoose';
+import { User, UserSchema } from './Infraction';
 import { mongoURL } from '../../config.json';
 
 export function connectDB(): void {
@@ -94,4 +95,70 @@ export async function getTagNames(): Promise<TagResponse> {
   } catch (error) {
     return { success: false, info: 'An error occurred', error: error };
   }
+}
+
+const antiLinkSchema = new Schema({
+  url: String,
+  timestamp: Number,
+  reason: String,
+  user: UserSchema,
+  admin: Boolean,
+  enabled: Boolean
+});
+const antiLinkModel = model('AntiLink', antiLinkSchema);
+
+export async function getAllowedDomains(): Promise<string[]> {
+  const links = await antiLinkModel.find();
+  if (!links) return [];
+  const allowedLinks: string[] = [];
+  links
+    .filter((link) => true !== link.admin)
+    .filter((link) => 'string' === typeof link.url)
+    .forEach((link) => allowedLinks.push(link.url as string));
+  return allowedLinks;
+}
+
+export async function getAllowedDomainInfo(
+  url: string
+): Promise<{ url: string; timestamp: number; user: User } | null> {
+  const urlInfo = await antiLinkModel.findOne({ url: url });
+  if (!urlInfo) return null;
+  return {
+    url: urlInfo?.url || '',
+    timestamp: urlInfo?.timestamp || 0,
+    user: {
+      id: urlInfo.user?.id || '',
+      staff: urlInfo.user?.staff || false,
+      bot: urlInfo.user?.bot || false
+    }
+  };
+}
+
+export async function getAntiLinkState(): Promise<boolean> {
+  const status = await antiLinkModel.findOne({ admin: true });
+  if (!status) return false;
+  return status.enabled as boolean;
+}
+
+export async function toggleAntiLinks(state?: boolean): Promise<boolean> {
+  let status = await antiLinkModel.findOne({ admin: true });
+  if (!status) return false;
+  if (state === undefined) state = !status.enabled;
+  await antiLinkModel.findOneAndUpdate({ admin: true }, { enabled: state });
+  status = await antiLinkModel.findOne({ admin: true });
+  if (!status) return false;
+  return status.enabled as boolean;
+}
+
+export async function addAllowedURL(url: string, user: User): Promise<{ set: boolean; info: string }> {
+  const check = await antiLinkModel.findOne({ url: url });
+  if (check) {
+    return { set: false, info: 'URL already allowed' };
+  }
+  new antiLinkModel({ url: url, timestamp: Date.now(), user: user, admin: false, enabled: false }).save();
+  return { set: true, info: url };
+}
+
+export function removeAllowedURL(url: string): void {
+  antiLinkModel.findOneAndDelete({ url: url });
 }

@@ -1,21 +1,20 @@
 import { ChannelType, GuildMemberRoleManager, Message, TextChannel, Webhook, WebhookType } from 'discord.js';
 import { DiscordInviteRegex, HypixelAPIKeyRegex, IPAddressPattern, URLRegex } from '../utils/regex';
+import { getAllowedDomains, getAntiLinkState } from '../utils/mongo';
 import { autoModBypassRole } from '../../config.json';
 import DiscordManager from '../DiscordManager';
 import Infraction from '../utils/Infraction';
 
 class MessageHandler {
   discord: DiscordManager;
-  allowedDomains: string[];
+  allowedDomains?: string[];
   constructor(discordManager: DiscordManager) {
     this.discord = discordManager;
-    this.allowedDomains = [
-      '*.hypixel.net',
-      '*.discord.com',
-      '*.kathund.wtf',
-      'kath.lol',
-      'hypixel-api-reborn.github.io'
-    ];
+    this.updateAllowedDomains();
+  }
+
+  async updateAllowedDomains() {
+    this.allowedDomains = await getAllowedDomains();
   }
 
   async onMessage(message: Message) {
@@ -31,6 +30,7 @@ class MessageHandler {
 
     const memberRoles = (message.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     if (memberRoles.includes(autoModBypassRole)) return;
+    this.updateAllowedDomains();
     const hypixelKeyTest = HypixelAPIKeyRegex.test(message.content);
     const ipTest = IPAddressPattern.test(message.content);
     const urlTest = this.isUrlAllowed(message.content);
@@ -60,6 +60,8 @@ class MessageHandler {
         .save();
       setTimeout(() => alert.delete(), 10000);
     } else if (ipTest || !urlTest || discordTest) {
+      const status = await getAntiLinkState();
+      if (false === status) return;
       const filteredContent = message.content
         .replace(IPAddressPattern, '[Content Removed]')
         .replace(URLRegex, '[Content Removed]')
@@ -103,12 +105,12 @@ class MessageHandler {
   }
 
   isUrlAllowed(url: string): boolean {
+    if (!this.allowedDomains) return false;
     const isValidUrl = URLRegex.test(url);
     if (!isValidUrl) return false;
     const match = url.match(URLRegex);
     if (!match) return false;
     const domain: string = match[3];
-    console.log(domain);
     if (this.allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
       return true;
     } else if (!this.allowedDomains.some((pattern) => pattern === domain)) {

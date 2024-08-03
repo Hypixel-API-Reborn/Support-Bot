@@ -3,7 +3,7 @@ import { ChannelType, EmbedBuilder } from 'discord.js';
 import { model, Schema } from 'mongoose';
 import ms from 'ms';
 
-export interface InfractionUser {
+export interface User {
   id: string;
   staff: boolean;
   bot: boolean;
@@ -16,13 +16,13 @@ export interface InfractionInfomation {
   reason: string;
   long: number | null;
   type: InfractionType;
-  user: InfractionUser;
-  staff: InfractionUser;
+  user: User;
+  staff: User;
   timestamp: number;
   extraInfo: string;
 }
 
-const InteractionUserSchema = new Schema({ id: String, staff: Boolean, bot: Boolean });
+export const UserSchema = new Schema({ id: String, staff: Boolean, bot: Boolean });
 const InfractionSchema = new Schema({
   automatic: Boolean,
   reason: String,
@@ -31,8 +31,8 @@ const InfractionSchema = new Schema({
     default: null
   },
   type: String,
-  user: InteractionUserSchema,
-  staff: InteractionUserSchema,
+  user: UserSchema,
+  staff: UserSchema,
   timestamp: Number,
   extraInfo: String
 });
@@ -77,12 +77,12 @@ class Infraction {
     return this;
   }
 
-  public setUser(user: InfractionUser): this {
+  public setUser(user: User): this {
     this.infraction.user = user;
     return this;
   }
 
-  public setStaff(staff: InfractionUser): this {
+  public setStaff(staff: User): this {
     this.infraction.staff = staff;
     return this;
   }
@@ -113,11 +113,11 @@ class Infraction {
     return this.infraction.type;
   }
 
-  public getUser(): InfractionUser {
+  public getUser(): User {
     return this.infraction.user;
   }
 
-  public getStaff(): InfractionUser {
+  public getStaff(): User {
     return this.infraction.staff;
   }
 
@@ -143,7 +143,7 @@ class Infraction {
     const channel = guild.channels.cache.get(infractionLogchannel);
     if (!channel || channel.type !== ChannelType.GuildText) return this;
     const embed = new EmbedBuilder()
-      .setColor('#FF8C00')
+      .setColor(0xff8c00)
       .setTitle(`Infraction | ${this.infraction.type}`)
       .addFields(
         { name: 'User', value: `<@${this.infraction.user.id}>` },

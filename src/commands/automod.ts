@@ -1,4 +1,12 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import {
+  getAllowedDomainInfo,
+  getAllowedDomains,
+  getAntiLinkState,
+  removeAllowedURL,
+  toggleAntiLinks,
+  addAllowedURL
+} from '../utils/mongo';
+import { ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } from 'discord.js';
 import { autoModBypassRole } from '../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
 import ms from 'ms';
@@ -24,6 +32,27 @@ export const data = new SlashCommandBuilder()
           .setName('unpermit')
           .setDescription('Remove someones automod bypass')
           .addUserOption((option) => option.setName('user').setDescription('The user to remove').setRequired(true))
+      )
+  )
+  .addSubcommandGroup((subGroup) =>
+    subGroup
+      .setName('anti-link')
+      .setDescription('Manage AutoMod Anti-Link')
+      .addSubcommand((subcommand) => subcommand.setName('disable').setDescription('Disable AutoMod Anti-Link'))
+      .addSubcommand((subcommand) => subcommand.setName('enable').setDescription('Enable AutoMod Anti-Link'))
+      .addSubcommand((subcommand) => subcommand.setName('toggle').setDescription('Toggle AutoMod Anti-Link'))
+      .addSubcommand((subcommand) => subcommand.setName('info').setDescription('Info about AutoMod Anti-Link'))
+      .addSubcommand((subcommand) =>
+        subcommand
+          .setName('add')
+          .setDescription('Add a bypass url to AutoMod Anti-Link')
+          .addStringOption((option) => option.setName('url').setDescription('Url you want to bypass').setRequired(true))
+      )
+      .addSubcommand((subcommand) =>
+        subcommand
+          .setName('remove')
+          .setDescription('Remove a bypass url to AutoMod Anti-Link')
+          .addStringOption((option) => option.setName('url').setDescription('Url you want to remove').setRequired(true))
       )
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
@@ -88,6 +117,85 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             permit = permit.filter((data: UserPermit) => data.id !== user.id);
             writeFileSync('data/permit.json', JSON.stringify(permit));
             await interaction.reply({ content: `${user} is no longer permited` });
+            break;
+          }
+          default: {
+            await interaction.reply({
+              content: 'Invalid subcommand Please provide a valid subcommand',
+              ephemeral: true
+            });
+          }
+        }
+        break;
+      }
+      case 'anti-link': {
+        switch (subCommand) {
+          case 'disable': {
+            const state = await toggleAntiLinks(false);
+            await interaction.reply({
+              content: `Anti-Link has been ${state ? 'enabled' : 'disabled'}`,
+              ephemeral: true
+            });
+            break;
+          }
+          case 'enable': {
+            const state = await toggleAntiLinks(true);
+            await interaction.reply({
+              content: `Anti-Link has been ${state ? 'enabled' : 'disabled'}`,
+              ephemeral: true
+            });
+            break;
+          }
+          case 'toggle': {
+            const state = await toggleAntiLinks();
+            await interaction.reply({
+              content: `Anti-Link has been ${state ? 'enabled' : 'disabled'}`,
+              ephemeral: true
+            });
+            break;
+          }
+          case 'info': {
+            const allowedUrls = await getAllowedDomains();
+            const domains: string[] = [];
+            allowedUrls.forEach(async (url) => {
+              const info = await getAllowedDomainInfo(url);
+              if (!info) return;
+              domains.push(
+                `Url: \`${info.url}\`\nAdded By: <@${info.user.id}>\nTimestamp: <t:${Math.floor(
+                  info.timestamp / 1000
+                )}:F> (<t:${Math.floor(info.timestamp / 1000)}:R>)`
+              );
+            });
+            const state = await getAntiLinkState();
+            const embed = new EmbedBuilder()
+              .setColor(0xff8c00)
+              .setTitle('Anti-Link Info')
+              .setDescription(`**${state ? 'Enabled' : 'Disabled'}**\n\n**Domains:**\n${domains.join('\n\n')}`);
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+            break;
+          }
+          case 'add': {
+            const url = interaction.options.getString('url');
+            if (!url) {
+              await interaction.reply({ content: 'Please provide a valid url', ephemeral: true });
+              return;
+            }
+            const check = await addAllowedURL(url, { id: interaction.user.id, staff: true, bot: interaction.user.bot });
+            if (false === check.set) {
+              await interaction.reply({ content: `Something went wrong \`${check.info}\``, ephemeral: true });
+              return;
+            }
+            await interaction.reply({ content: `\`${url}\` has been added to the bypass list`, ephemeral: true });
+            break;
+          }
+          case 'remove': {
+            const url = interaction.options.getString('url');
+            if (!url) {
+              await interaction.reply({ content: 'Please provide a valid url', ephemeral: true });
+              return;
+            }
+            removeAllowedURL(url);
+            await interaction.reply({ content: `\`${url}\` has been removed to the bypass list`, ephemeral: true });
             break;
           }
           default: {
