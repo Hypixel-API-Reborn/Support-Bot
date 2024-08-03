@@ -33,57 +33,13 @@ class MessageHandler {
     this.updateAllowedDomains();
     const hypixelKeyTest = HypixelAPIKeyRegex.test(message.content);
     const ipTest = IPAddressPattern.test(message.content);
-    const urlTest = this.isUrlAllowed(message.content);
+    const urlTest = await this.isUrlAllowed(message.content);
     const discordTest = DiscordInviteRegex.test(message.content);
-    const webhook = await this.getWebhook(message.channel);
-    if (!webhook) return;
-    if (hypixelKeyTest) {
-      const filteredContent = message.content.replace(HypixelAPIKeyRegex, '[API Key Removed]');
-      webhook.send({
-        username: message.member.nickname ?? message.author.globalName ?? message.author.username,
-        avatarURL: message.member.avatarURL() ?? message.author.avatarURL() ?? undefined,
-        content: filteredContent
-      });
-      const alert = await message.reply({ content: 'Hey thats your Hypixel API Key. Please dont post that' });
-      message.delete();
-      new Infraction({
-        automatic: true,
-        reason: 'Automod Pickup',
-        long: null,
-        type: 'AutoMod',
-        user: { id: message.author.id, staff: false, bot: message.author.bot },
-        staff: { id: message.client.user.id, staff: true, bot: message.client.user.bot },
-        timestamp: Date.now(),
-        extraInfo: `Message: ${message.content}\[Jump to Message](${message.url})`
-      })
-        .log()
-        .save();
-      setTimeout(() => alert.delete(), 10000);
-    } else if (ipTest || !urlTest || discordTest) {
-      const status = await getAntiLinkState();
-      if (false === status) return;
-      const filteredContent = message.content
-        .replace(IPAddressPattern, '[Content Removed]')
-        .replace(URLRegex, '[Content Removed]')
-        .replace(DiscordInviteRegex, '[Content Removed]');
-      webhook.send({
-        username: message.member.nickname ?? message.author.globalName ?? message.author.username,
-        avatarURL: message.member.avatarURL() ?? message.author.avatarURL() ?? undefined,
-        content: filteredContent
-      });
-      message.delete();
-      new Infraction({
-        automatic: true,
-        reason: 'Automod Pickup',
-        long: null,
-        type: 'AutoMod',
-        user: { id: message.author.id, staff: false, bot: message.author.bot },
-        staff: { id: message.client.user.id, staff: true, bot: message.client.user.bot },
-        timestamp: Date.now(),
-        extraInfo: `**Message:**\n\`\`\`\n${message.content}\n\`\`\`\n[Jump to Message](${message.url})`
-      })
-        .log()
-        .save();
+    if (ipTest || !urlTest || discordTest || hypixelKeyTest) {
+      this.AutoModPickup(
+        message,
+        hypixelKeyTest ? "Hey thats your Hypixel API Key. Please **don't** post that." : undefined
+      );
     }
   }
 
@@ -104,7 +60,9 @@ class MessageHandler {
     return webhooks.first();
   }
 
-  isUrlAllowed(url: string): boolean {
+  async isUrlAllowed(url: string): Promise<boolean> {
+    const antiLinkState = await getAntiLinkState();
+    if (false === antiLinkState) return false;
     if (!this.allowedDomains) return false;
     const isValidUrl = URLRegex.test(url);
     if (!isValidUrl) return false;
@@ -120,6 +78,39 @@ class MessageHandler {
       );
     }
     return false;
+  }
+
+  async AutoModPickup(message: Message, alertMessage?: string) {
+    if (message.channel.type !== ChannelType.GuildText || !message.member) return;
+    const webhook = await this.getWebhook(message.channel);
+    if (!webhook) return;
+    const filteredContent = message.content
+      .replace(HypixelAPIKeyRegex, '[API Key Removed]')
+      .replace(IPAddressPattern, '[Content Removed]')
+      .replace(URLRegex, '[Content Removed]')
+      .replace(DiscordInviteRegex, '[Content Removed]');
+    webhook.send({
+      username: message.member.nickname ?? message.author.globalName ?? message.author.username,
+      avatarURL: message.member.avatarURL() ?? message.author.avatarURL() ?? undefined,
+      content: filteredContent
+    });
+    if (alertMessage !== undefined) {
+      const alert = await message.reply({ content: alertMessage });
+      setTimeout(() => alert.delete(), 10000);
+    }
+    message.delete();
+    new Infraction({
+      automatic: true,
+      reason: 'Automod Pickup',
+      long: null,
+      type: 'AutoMod',
+      user: { id: message.author.id, staff: false, bot: message.author.bot },
+      staff: { id: message.client.user.id, staff: true, bot: message.client.user.bot },
+      timestamp: Date.now(),
+      extraInfo: `**Message:**\n\`\`\`\n${message.content}\n\`\`\`\n[Jump to Message](${message.url})`
+    })
+      .log()
+      .save();
   }
 }
 
