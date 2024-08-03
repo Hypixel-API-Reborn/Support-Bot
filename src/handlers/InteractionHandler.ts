@@ -15,7 +15,7 @@ class InteractionHandler {
     this.discord = discordManager;
   }
 
-  async onInteraction(interaction: BaseInteraction) {
+  onInteraction(interaction: BaseInteraction) {
     if (interaction.isChatInputCommand()) this.commandInteraction(interaction);
     if (interaction.isAutocomplete()) this.autoCompleteInteraction(interaction);
     if (interaction.isModalSubmit()) this.modalSubmitInteraction(interaction);

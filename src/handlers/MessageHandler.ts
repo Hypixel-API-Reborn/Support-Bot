@@ -59,7 +59,7 @@ class MessageHandler {
         .log()
         .save();
       setTimeout(() => alert.delete(), 10000);
-    } else if (ipTest || urlTest || discordTest) {
+    } else if (ipTest || !urlTest || discordTest) {
       const filteredContent = message.content
         .replace(IPAddressPattern, '[Content Removed]')
         .replace(URLRegex, '[Content Removed]')
@@ -108,7 +108,7 @@ class MessageHandler {
     const match = url.match(URLRegex);
     if (!match) return false;
     const domain: string = match[3];
-
+    console.log(domain);
     if (this.allowedDomains.some((pattern) => pattern === domain) && !match[2]) {
       return true;
     } else if (!this.allowedDomains.some((pattern) => pattern === domain)) {
