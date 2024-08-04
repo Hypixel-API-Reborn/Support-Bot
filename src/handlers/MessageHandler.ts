@@ -18,16 +18,7 @@ class MessageHandler {
   }
 
   async onMessage(message: Message) {
-    if (
-      message.channel.type !== ChannelType.GuildText ||
-      message.author.bot ||
-      !message.channel ||
-      !message.member ||
-      !message.guild
-    ) {
-      return;
-    }
-
+    if (!message.member) return;
     const memberRoles = (message.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     if (memberRoles.includes(autoModBypassRole)) return;
     this.updateAllowedDomains();
@@ -35,7 +26,7 @@ class MessageHandler {
     const ipTest = IPAddressPattern.test(message.content);
     const urlTest = await this.isUrlAllowed(message.content);
     const discordTest = DiscordInviteRegex.test(message.content);
-    if (ipTest || !urlTest || discordTest || hypixelKeyTest) {
+    if (ipTest || false === urlTest || discordTest || hypixelKeyTest) {
       this.AutoModPickup(
         message,
         hypixelKeyTest ? "Hey thats your Hypixel API Key. Please **don't** post that." : undefined
@@ -65,7 +56,7 @@ class MessageHandler {
     if (false === antiLinkState) return false;
     if (!this.allowedDomains) return false;
     const isValidUrl = URLRegex.test(url);
-    if (!isValidUrl) return false;
+    if (!isValidUrl) return true;
     const match = url.match(URLRegex);
     if (!match) return false;
     const domain: string = match[3];
@@ -92,7 +83,8 @@ class MessageHandler {
     webhook.send({
       username: message.member.nickname ?? message.author.globalName ?? message.author.username,
       avatarURL: message.member.avatarURL() ?? message.author.avatarURL() ?? undefined,
-      content: filteredContent
+      content: filteredContent,
+      files: message.attachments.map((attachment) => attachment.url)
     });
     if (alertMessage !== undefined) {
       const alert = await message.reply({ content: alertMessage });
