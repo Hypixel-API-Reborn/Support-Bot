@@ -3,9 +3,13 @@ import {
   AutocompleteInteraction,
   GuildMemberRoleManager,
   ModalSubmitInteraction,
-  BaseInteraction
+  ButtonInteraction,
+  BaseInteraction,
+  ChannelType
 } from 'discord.js';
+import { getUserInfractions } from '../utils/Infraction';
 import { teamRole, devRole } from '../../config.json';
+import { getInfractionEmbed } from '../utils/user';
 import { modifyTag, Tag } from '../utils/mongo';
 import DiscordManager from '../DiscordManager';
 
@@ -19,6 +23,7 @@ class InteractionHandler {
     if (interaction.isChatInputCommand()) this.commandInteraction(interaction);
     if (interaction.isAutocomplete()) this.autoCompleteInteraction(interaction);
     if (interaction.isModalSubmit()) this.modalSubmitInteraction(interaction);
+    if (interaction.isButton()) this.buttonInteraction(interaction);
   }
 
   async commandInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -69,6 +74,36 @@ class InteractionHandler {
       } else {
         await interaction.reply({ content: 'An error occurred', ephemeral: true });
       }
+    }
+  }
+
+  async buttonInteraction(interaction: ButtonInteraction): Promise<void> {
+    if (!interaction.channel || !interaction.guild) return;
+    await interaction.deferReply({ ephemeral: true });
+    console.log(
+      `Interaction Event trigged by ${interaction.user.username} (${interaction.user.id}) clicked button ${
+        interaction.customId
+      } in ${interaction.guild.id} in ${interaction.channel.id}`
+    );
+    if (interaction.customId.startsWith('infractions.')) {
+      const userId = interaction.customId.split('.')[1];
+      const data = await getUserInfractions(userId);
+      if (false === data.success) {
+        await interaction.followUp({ content: data.info });
+        return;
+      }
+      await interaction.followUp({ embeds: [getInfractionEmbed(userId, data.info, data.infractions)] });
+    } else if (interaction.customId.startsWith('messageDelete.')) {
+      const [channelId, messageId] = [interaction.customId.split('.')[1], interaction.customId.split('.')[2]];
+      const channel = interaction.guild.channels.cache.get(channelId);
+      if (!channel || channel.type !== ChannelType.GuildText) {
+        await interaction.followUp({ content: 'Message not found' });
+        return;
+      }
+      const message = await channel.messages.fetch(messageId);
+      if (!message) await interaction.followUp({ content: 'Message not found' });
+      await message.delete();
+      await interaction.followUp({ content: 'Message has been deleted' });
     }
   }
 }

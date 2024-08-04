@@ -4,10 +4,10 @@ import {
   PermissionFlagsBits,
   ActionRowBuilder,
   ButtonBuilder,
-  EmbedBuilder,
   ButtonStyle
 } from 'discord.js';
 import Infraction, { getUserInfractions } from '../utils/Infraction';
+import { getInfractionEmbed, getUserInfoEmbed } from '../utils/user';
 import ms from 'ms';
 
 export const data = new SlashCommandBuilder()
@@ -81,27 +81,14 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     }
     switch (subCommand) {
       case 'info': {
-        const embed = new EmbedBuilder()
-          .setTitle('User Infomation')
-          .setTimestamp()
-          .setColor(0xff8c00)
-          .setDescription(
-            `<@${user.id}>\n\nBot: ${user.user.bot}\nID: ${user.id}\n Created: <t:${Math.floor(
-              user.user.createdTimestamp / 1000
-            )}:F> (<t:${Math.floor(user.user.createdTimestamp / 1000)}:R>)\nJoined: <t:${Math.floor(
-              (user.joinedTimestamp ?? 0) / 1000
-            )}:F> (<t:${Math.floor((user.joinedTimestamp ?? 0) / 1000)}:R>)\nRoles: ${user.roles.cache
-              .map((role) => `<@&${role.id}>`)
-              .filter((role) => role !== `<@&${interaction.guild?.id}>`)
-              .join(', ')}`
-          );
         await interaction.reply({
-          embeds: [embed],
+          embeds: [getUserInfoEmbed(user)],
           components: [
             new ActionRowBuilder<ButtonBuilder>().addComponents(
-              new ButtonBuilder().setCustomId(`logs.${user.id}`).setLabel('view logs').setStyle(ButtonStyle.Secondary),
-              new ButtonBuilder().setCustomId(`kick.${user.id}`).setLabel('kick').setStyle(ButtonStyle.Danger),
-              new ButtonBuilder().setCustomId(`ban.${user.id}`).setLabel('ban').setStyle(ButtonStyle.Danger)
+              new ButtonBuilder()
+                .setCustomId(`infractions.${user.id}`)
+                .setLabel('View Infractions')
+                .setStyle(ButtonStyle.Secondary)
             )
           ],
           ephemeral: true
@@ -109,21 +96,15 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         break;
       }
       case 'infractions': {
-        const userInfractions = await getUserInfractions(commandUser.id);
-        if (!userInfractions.success) {
-          await interaction.reply({ content: userInfractions.info, ephemeral: true });
+        const data = await getUserInfractions(commandUser.id);
+        if (false === data.success) {
+          await interaction.reply({ content: data.info, ephemeral: true });
           return;
         }
-        const embed = new EmbedBuilder()
-          .setTitle('User Infractions')
-          .setDescription(
-            `${userInfractions.info}\n\n${userInfractions.infractions
-              ?.map((infraction) => infraction.toString())
-              .join('\n\n')}`
-          )
-          .setColor(0xff8c00)
-          .setTimestamp();
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({
+          embeds: [getInfractionEmbed(commandUser.id, data.info, data.infractions)],
+          ephemeral: true
+        });
         break;
       }
       case 'warn': {
@@ -136,7 +117,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
           timestamp: Date.now(),
-          extraInfo: ''
+          extraInfo: { url: '', messageId: '', channelId: '' }
         })
           .log()
           .save();
@@ -153,7 +134,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
           timestamp: Date.now(),
-          extraInfo: ''
+          extraInfo: { url: '', messageId: '', channelId: '' }
         })
           .log()
           .save();
@@ -181,7 +162,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
           timestamp: Date.now(),
-          extraInfo: ''
+          extraInfo: { url: '', messageId: '', channelId: '' }
         })
           .log()
           .save();
@@ -199,7 +180,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           user: { id: commandUser.id, staff: false, bot: commandUser.bot },
           staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
           timestamp: Date.now(),
-          extraInfo: ''
+          extraInfo: { url: '', messageId: '', channelId: '' }
         })
           .log()
           .save();

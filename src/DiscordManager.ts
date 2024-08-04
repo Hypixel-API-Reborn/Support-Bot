@@ -38,9 +38,9 @@ class DiscordManager {
   async ready() {
     if (!this.client) return;
     console.log(`Logged in as ${this.client.user?.username} (${this.client.user?.id})!`);
-    connectDB();
     global.guild = await this.client.guilds.fetch(serverId);
     cron.schedule(`* * * * *`, () => CheckPermits());
+    connectDB();
   }
 
   async deployCommands(): Promise<void> {

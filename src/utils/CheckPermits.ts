@@ -4,9 +4,9 @@ import { UserPermit } from '../commands/automod';
 
 export default function CheckPermits() {
   const permitData = readFileSync('data/permit.json');
-  if (!permitData) return;
+  if (permitData === undefined) return;
   const permit = JSON.parse(permitData.toString());
-  if (!permit) return;
+  if (permit === undefined) return;
   const currentTime = Math.floor(new Date().getTime() / 1000);
   permit.forEach((user: UserPermit) => {
     if (user.removeTime < currentTime) {

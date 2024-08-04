@@ -4,6 +4,7 @@ import { getAllowedDomains, getAntiLinkState } from '../utils/mongo';
 import { autoModBypassRole } from '../../config.json';
 import DiscordManager from '../DiscordManager';
 import Infraction from '../utils/Infraction';
+import { writeFileSync } from 'fs';
 
 class MessageHandler {
   discord: DiscordManager;
@@ -26,7 +27,7 @@ class MessageHandler {
     const ipTest = IPAddressPattern.test(message.content);
     const urlTest = await this.isUrlAllowed(message.content);
     const discordTest = DiscordInviteRegex.test(message.content);
-    if (ipTest || false === urlTest || discordTest || hypixelKeyTest) {
+    if ((ipTest || false === urlTest || discordTest || hypixelKeyTest) && false === message.author.bot) {
       this.AutoModPickup(
         message,
         hypixelKeyTest ? "Hey thats your Hypixel API Key. Please **don't** post that." : undefined
@@ -80,7 +81,7 @@ class MessageHandler {
       .replace(IPAddressPattern, '[Content Removed]')
       .replace(URLRegex, '[Content Removed]')
       .replace(DiscordInviteRegex, '[Content Removed]');
-    webhook.send({
+    const webHookMsg = await webhook.send({
       username: message.member.nickname ?? message.author.globalName ?? message.author.username,
       avatarURL: message.member.avatarURL() ?? message.author.avatarURL() ?? undefined,
       content: filteredContent,
@@ -90,6 +91,7 @@ class MessageHandler {
       const alert = await message.reply({ content: alertMessage });
       setTimeout(() => alert.delete(), 10000);
     }
+    writeFileSync('data/message.txt', `${message.content}`);
     message.delete();
     new Infraction({
       automatic: true,
@@ -99,7 +101,7 @@ class MessageHandler {
       user: { id: message.author.id, staff: false, bot: message.author.bot },
       staff: { id: message.client.user.id, staff: true, bot: message.client.user.bot },
       timestamp: Date.now(),
-      extraInfo: `**Message:**\n\`\`\`\n${message.content}\n\`\`\`\n[Jump to Message](${message.url})`
+      extraInfo: { url: message.url, messageId: webHookMsg.id, channelId: message.channel.id }
     })
       .log()
       .save();

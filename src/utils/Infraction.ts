@@ -1,6 +1,7 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, EmbedBuilder } from 'discord.js';
 import { infractionLogchannel } from '../../config.json';
-import { ChannelType, EmbedBuilder } from 'discord.js';
 import { model, Schema } from 'mongoose';
+import { unlinkSync } from 'fs';
 import ms from 'ms';
 
 export interface User {
@@ -11,6 +12,12 @@ export interface User {
 
 export type InfractionType = 'AutoMod' | 'WARN' | 'KICK' | 'BAN' | 'MUTE' | 'UNMUTE';
 
+export interface InfractionExtraInfo {
+  url: string;
+  messageId: string;
+  channelId: string;
+}
+
 export interface InfractionInfomation {
   automatic: boolean;
   reason: string;
@@ -19,23 +26,23 @@ export interface InfractionInfomation {
   user: User;
   staff: User;
   timestamp: number;
-  extraInfo: string;
+  extraInfo: InfractionExtraInfo;
 }
 
 export const UserSchema = new Schema({ id: String, staff: Boolean, bot: Boolean });
+export const ExtraInfoSchema = new Schema({ url: String, messageId: String, channelId: String });
+
 const InfractionSchema = new Schema({
   automatic: Boolean,
   reason: String,
-  long: {
-    type: Number,
-    default: null
-  },
+  long: { type: Number, default: null },
   type: String,
   user: UserSchema,
   staff: UserSchema,
   timestamp: Number,
-  extraInfo: String
+  extraInfo: ExtraInfoSchema
 });
+
 const InfractionModel = model('infraction', InfractionSchema);
 
 class Infraction {
@@ -92,7 +99,7 @@ class Infraction {
     return this;
   }
 
-  public setExtraInfo(extraInfo: string): this {
+  public setExtraInfo(extraInfo: InfractionExtraInfo): this {
     this.infraction.extraInfo = extraInfo;
     return this;
   }
@@ -125,18 +132,18 @@ class Infraction {
     return this.infraction.timestamp;
   }
 
-  public getExtraInfo(): string {
+  public getExtraInfo(): InfractionExtraInfo {
     return this.infraction.extraInfo;
   }
 
   public toString(): string {
-    return `Infraction: ${this.infraction.reason}\nType: ${this.infraction.type}\nLong: ${
-      this.infraction.long
-    }\nAutomatic: ${this.infraction.automatic ? 'Yes' : 'No'}\nUser: <@${this.infraction.user.id}>\nStaff: ${
-      this.infraction.staff ? `<@${this.infraction.staff.id}>` : 'None'
-    }\nTimestamp: <t:${Math.floor(
+    return `**Infraction:** ${this.infraction.reason}\n**Type:** ${this.infraction.type}\n**User:** <@${
+      this.infraction.user.id
+    }>\n**Staff:** <@${this.infraction.staff.id}>\n**Timestamp:** <t:${Math.floor(
       this.infraction.timestamp / 1000
-    )}:t> (<t:${Math.floor(this.infraction.timestamp / 1000)}:R>)`;
+    )}:F> (<t:${Math.floor(this.infraction.timestamp / 1000)}:R>)\n**Automatic:** ${
+      this.infraction.automatic ? 'Yes' : 'No'
+    }\n${null !== this.infraction.long ? `**How long:** ${ms(86400000, { long: true })}` : ''}`;
   }
 
   public log(): this {
@@ -152,28 +159,43 @@ class Infraction {
         { name: 'Automatic', value: this.infraction.automatic ? 'Yes' : 'No' },
         {
           name: 'Timestamp',
-          value: `<t:${Math.floor(this.infraction.timestamp / 1000)}:t> (<t:${Math.floor(
+          value: `<t:${Math.floor(this.infraction.timestamp / 1000)}:F> (<t:${Math.floor(
             this.infraction.timestamp / 1000
           )}:R>)`
         }
       );
-    if (0 < this.infraction.extraInfo.length) embed.addFields({ name: 'Info', value: this.infraction.extraInfo });
-    if (this.infraction.long) embed.addFields({ name: 'How long', value: `${ms(86400000, { long: true })}` });
-    channel.send({ embeds: [embed] });
+    if (null !== this.infraction.long) embed.addFields({ name: 'How long', value: `${ms(86400000, { long: true })}` });
+    const components: ActionRowBuilder<ButtonBuilder>[] = [];
+    if (true === this.infraction.automatic && 'AutoMod' === this.infraction.type) {
+      components.push(
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setURL(this.infraction.extraInfo.url)
+            .setLabel('Jump To Message')
+            .setStyle(ButtonStyle.Link),
+          new ButtonBuilder()
+            .setLabel('Delete Message')
+            .setStyle(ButtonStyle.Danger)
+            .setCustomId(`messageDelete.${this.infraction.extraInfo.channelId}.${this.infraction.extraInfo.messageId}`),
+          new ButtonBuilder()
+            .setCustomId(`infractions.${this.infraction.user.id}`)
+            .setLabel('View User Infractions')
+            .setStyle(ButtonStyle.Secondary)
+        )
+      );
+      setTimeout(() => channel.send({ embeds: [embed], components: components, files: ['data/message.txt'] }), 1000);
+      setTimeout(() => unlinkSync('data/message.txt'), 3000);
+    } else {
+      channel.send({ embeds: [embed] });
+    }
     return this;
   }
 }
-
-export interface InfractionReturn {
-  success: boolean;
-  info: string;
-  infraction?: Infraction;
-  infractions?: Infraction[];
-}
-
-export async function getUserInfractions(id: string): Promise<InfractionReturn> {
+export async function getUserInfractions(
+  id: string
+): Promise<{ success: boolean; info: string; infractions: Infraction[] }> {
   const userInfractions = await InfractionModel.find({ 'user.id': id });
-  if (!userInfractions) return { success: false, info: 'No infractions found' };
+  if (!userInfractions) return { success: false, info: 'No infractions found', infractions: [] };
   const foundInfraction: Infraction[] = [];
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error

@@ -103,13 +103,13 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             writeFileSync('data/permit.json', JSON.stringify(permit));
             user.roles.add(autoModBypassRole);
             await interaction.reply({
-              content: `${user} has been permitted to <t:${removeTime}:t> (<t:${removeTime}:R>)`
+              content: `${user} has been permitted to <t:${removeTime}:F> (<t:${removeTime}:R>)`
             });
             break;
           }
           case 'unpermit': {
             const permitUser = permit.find((data: UserPermit) => data.id === user.id);
-            if (!permitUser) {
+            if (permitUser === undefined) {
               await interaction.reply({ content: 'User is not permited', ephemeral: true });
               return;
             }
