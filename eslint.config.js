@@ -12,7 +12,8 @@ export default [
       sourceType: 'module',
       globals: {
         ...globals.es2022,
-        ...globals.node
+        ...globals.node,
+        guild: 'writable'
       }
     },
     rules: {
@@ -44,6 +45,7 @@ export default [
       'default-case-last': 'warn',
       'no-self-compare': 'error',
       'no-new-wrappers': 'error',
+      'no-fallthrough': 'error',
       'no-lone-blocks': 'error',
       'no-undef-init': 'error',
       'no-else-return': 'warn',
@@ -56,7 +58,6 @@ export default [
       'no-multi-str': 'warn',
       'no-lonely-if': 'warn',
       'no-new-func': 'error',
-      'no-console': 'error',
       camelcase: 'warn',
       'no-var': 'warn',
       eqeqeq: 'warn',

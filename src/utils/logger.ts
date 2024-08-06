@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-// Credits https://github.com/DuckySoLucky/hypixel-discord-chat-bridge/blob/f8a8a8e1e1c469127b8fcd03e6553b43f22b8250/src/Logger.js (Edited)
+/* Credits https://github.com/DuckySoLucky/hypixel-discord-chat-bridge/blob/f8a8a8e1e1c469127b8fcd03e6553b43f22b8250/src/Logger.js (Edited) */
 const customLevels = { event: 0, error: 1, other: 2, max: 3 };
 import { createLogger, format, transports } from 'winston';
-
 const timezone = () => {
   return new Date().toLocaleString('en-US', {
     year: 'numeric',
@@ -15,12 +13,10 @@ const timezone = () => {
     hour12: false
   });
 };
-
 const eventTransport = new transports.File({ level: 'event', filename: './logs/event.log' });
 const errorTransport = new transports.File({ level: 'error', filename: './logs/error.log' });
 const otherTransport = new transports.File({ level: 'other', filename: './logs/other.log' });
 const combinedTransport = new transports.File({ level: 'max', filename: './logs/combined.log' });
-
 const eventLogger = createLogger({
   level: 'event',
   levels: customLevels,
@@ -32,7 +28,6 @@ const eventLogger = createLogger({
   ),
   transports: [eventTransport, combinedTransport]
 });
-
 const errorLogger = createLogger({
   level: 'error',
   levels: customLevels,
@@ -55,7 +50,6 @@ const otherLogger = createLogger({
   ),
   transports: [otherTransport, combinedTransport]
 });
-
 const logger = {
   event: (message: any) => {
     eventLogger.log('event', message);
@@ -70,7 +64,6 @@ const logger = {
     console.log(message);
   }
 };
-
 export const eventMessage = logger.event;
 export const errorMessage = logger.error;
 export const otherMessage = logger.other;
