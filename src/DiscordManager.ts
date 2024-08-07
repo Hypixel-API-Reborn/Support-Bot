@@ -4,8 +4,8 @@ import MessageHandler from './handlers/MessageHandler';
 import StateHandler from './handlers/StateHandler';
 import { SlashCommand } from './types/main';
 import { token } from '../config.json';
-import { readdirSync } from 'fs';
 import Logger from './utils/logger';
+import { readdirSync } from 'fs';
 
 class DiscordManager {
   interactionHandler: InteractionHandler;
@@ -44,7 +44,7 @@ class DiscordManager {
     const commandFiles = readdirSync('./src/commands');
     const commands = [];
     for (const file of commandFiles) {
-      const command = await import(`./commands/${file}`);
+      const command = new (await import(`./commands/${file}`)).default(this);
       commands.push(command.data.toJSON());
       if (command.data.name) {
         this.client.commands.set(command.data.name, command);
