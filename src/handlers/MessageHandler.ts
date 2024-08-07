@@ -1,5 +1,6 @@
 import { ChannelType, GuildMemberRoleManager, Message, TextChannel, Webhook, WebhookType } from 'discord.js';
 import { DiscordInviteRegex, HypixelAPIKeyRegex, IPAddressPattern, URLRegex } from '../utils/regex';
+import { getStickyMessage, updateStickyMessage } from '../commands/sticky';
 import { getAllowedDomains, getAntiLinkState } from '../utils/mongo';
 import { autoModBypassRole } from '../../config.json';
 import DiscordManager from '../DiscordManager';
@@ -20,6 +21,12 @@ class MessageHandler {
 
   async onMessage(message: Message) {
     if (!message.member) return;
+    const sticky = await getStickyMessage(message.channel.id);
+    if (null !== sticky && message.author !== message.client.user) {
+      message.channel.messages.fetch(sticky.message).then((message) => message.delete());
+      const newMsg = await message.channel.send({ content: sticky.content });
+      updateStickyMessage(message.channel.id, newMsg.id);
+    }
     const memberRoles = (message.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
     if (memberRoles.includes(autoModBypassRole)) return;
     this.updateAllowedDomains();
