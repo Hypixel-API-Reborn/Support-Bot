@@ -1,10 +1,5 @@
-import {
-  ChatInputCommandInteraction,
-  PermissionFlagsBits,
-  SlashCommandBuilder,
-  EmbedBuilder,
-  ChannelType
-} from 'discord.js';
+import { ChatInputCommandInteraction, PermissionFlagsBits, SlashCommandBuilder, ChannelType } from 'discord.js';
+import { UserSchema } from '../utils/Infraction';
 import { model, Schema } from 'mongoose';
 
 export const data = new SlashCommandBuilder()
@@ -35,8 +30,7 @@ export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
   .setDMPermission(false);
 
-const userSchema = new Schema({ id: String, staff: Boolean, bot: Boolean });
-const stickySchema = new Schema({ content: String, message: String, channel: String, user: userSchema });
+const stickySchema = new Schema({ content: String, message: String, channel: String, user: UserSchema });
 const stickyModel = model('Sticky', stickySchema);
 
 export async function getStickyMessage(
@@ -99,10 +93,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         break;
       }
       default: {
-        const embed = new EmbedBuilder()
-          .setTitle('Invalid subcommand')
-          .setDescription('Please provide a valid subcommand');
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ content: 'Invalid subcommand Please provide a valid subcommand', ephemeral: true });
       }
     }
   } catch (error) {

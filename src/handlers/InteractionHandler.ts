@@ -9,8 +9,8 @@ import {
 } from 'discord.js';
 import { getUserInfractions } from '../utils/Infraction';
 import { teamRole, devRole } from '../../config.json';
+import { modifyTag, saveTag } from '../commands/tag';
 import { getInfractionEmbed } from '../utils/user';
-import { modifyTag, Tag } from '../utils/mongo';
 import DiscordManager from '../DiscordManager';
 
 class InteractionHandler {
@@ -59,20 +59,18 @@ class InteractionHandler {
     if ('tagForm' === interaction.customId) {
       const name = interaction.fields.getTextInputValue('tagFormName').toLowerCase();
       const content = interaction.fields.getTextInputValue('tagFormContent');
-      new Tag(name, content, interaction.user.id, 'approved').save();
+      saveTag(name, content);
       await interaction.reply({ content: `The tag \`${name}\` has been added successfully`, ephemeral: true });
     } else if (interaction.customId.startsWith('t.e.')) {
       const memberRoles = (interaction.member.roles as GuildMemberRoleManager).cache.map((role) => role.id);
       if (memberRoles.some((role) => [teamRole, devRole].includes(role))) return;
       const name = interaction.customId.split('.')[2];
       const content = interaction.fields.getTextInputValue('tagFormUpdatedContent');
-      const updatedTag = await modifyTag(name, new Tag(name, content, interaction.user.id, 'approved'));
-      if (updatedTag.success) {
+      const updatedTag = await modifyTag(name, content);
+      if (updatedTag) {
         await interaction.reply({ content: `The tag \`${name}\` has been updated successfully`, ephemeral: true });
-      } else if (false === updatedTag.success && 'Tag not found' === updatedTag.info) {
-        await interaction.reply({ content: 'This tag does not exist!', ephemeral: true });
-      } else {
-        await interaction.reply({ content: 'An error occurred', ephemeral: true });
+      } else if (false === updatedTag) {
+        await interaction.reply({ content: `The tag \`${name}\` does not exist`, ephemeral: true });
       }
     }
   }

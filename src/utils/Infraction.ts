@@ -10,14 +10,13 @@ export interface User {
   bot: boolean;
 }
 
-export type InfractionType = 'AutoMod' | 'WARN' | 'KICK' | 'BAN' | 'MUTE' | 'UNMUTE';
-
 export interface InfractionExtraInfo {
   url: string;
   messageId: string;
   channelId: string;
 }
 
+export type InfractionType = 'AutoMod' | 'WARN' | 'KICK' | 'BAN' | 'MUTE' | 'UNMUTE';
 export interface InfractionInfomation {
   automatic: boolean;
   reason: string;
@@ -28,10 +27,8 @@ export interface InfractionInfomation {
   timestamp: number;
   extraInfo: InfractionExtraInfo;
 }
-
 export const UserSchema = new Schema({ id: String, staff: Boolean, bot: Boolean });
 export const ExtraInfoSchema = new Schema({ url: String, messageId: String, channelId: String });
-
 const InfractionSchema = new Schema({
   automatic: Boolean,
   reason: String,
@@ -42,7 +39,6 @@ const InfractionSchema = new Schema({
   timestamp: Number,
   extraInfo: ExtraInfoSchema
 });
-
 const InfractionModel = model('infraction', InfractionSchema);
 
 class Infraction {
@@ -191,6 +187,7 @@ class Infraction {
     return this;
   }
 }
+
 export async function getUserInfractions(
   id: string
 ): Promise<{ success: boolean; info: string; infractions: Infraction[] }> {

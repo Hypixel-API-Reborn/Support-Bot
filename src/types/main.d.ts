@@ -13,5 +13,6 @@ declare module 'discord.js' {
 }
 
 declare global {
+  // eslint-disable-next-line no-var
   var guild: Guild;
 }

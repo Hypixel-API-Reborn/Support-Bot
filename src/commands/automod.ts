@@ -1,14 +1,8 @@
-import {
-  getAllowedDomainInfo,
-  getAllowedDomains,
-  getAntiLinkState,
-  removeAllowedURL,
-  toggleAntiLinks,
-  addAllowedURL
-} from '../utils/mongo';
 import { ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } from 'discord.js';
+import { User, UserSchema } from '../utils/Infraction';
 import { autoModBypassRole } from '../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
+import { model, Schema } from 'mongoose';
 import ms from 'ms';
 
 export const data = new SlashCommandBuilder()
@@ -61,6 +55,66 @@ export const data = new SlashCommandBuilder()
 export interface UserPermit {
   id: string;
   removeTime: number;
+}
+
+const antiLinkSchema = new Schema({
+  url: String,
+  timestamp: Number,
+  reason: String,
+  user: UserSchema,
+  admin: Boolean,
+  enabled: Boolean
+});
+const antiLinkModel = model('AntiLink', antiLinkSchema);
+
+export async function getAllowedDomains(): Promise<string[]> {
+  const links = await antiLinkModel.find();
+  if (!links) return [];
+  const allowedLinks: string[] = [];
+  links
+    .filter((link) => true !== link.admin)
+    .filter((link) => 'string' === typeof link.url)
+    .forEach((link) => allowedLinks.push(link.url as string));
+  return allowedLinks;
+}
+
+export async function getAntiLinkState(): Promise<boolean> {
+  const status = await antiLinkModel.findOne({ admin: true });
+  if (!status) return false;
+  return status.enabled as boolean;
+}
+
+async function getAllowedDomainInfo(url: string): Promise<{ url: string; timestamp: number; user: User } | null> {
+  const urlInfo = await antiLinkModel.findOne({ url: url });
+  if (!urlInfo) return null;
+  return {
+    url: urlInfo?.url || '',
+    timestamp: urlInfo?.timestamp || 0,
+    user: { id: urlInfo.user?.id || '', staff: urlInfo.user?.staff || false, bot: urlInfo.user?.bot || false }
+  };
+}
+
+async function toggleAntiLinks(state?: boolean): Promise<boolean> {
+  let status = await antiLinkModel.findOne({ admin: true });
+  if (!status) return false;
+  if (state === undefined) state = !status.enabled;
+  await antiLinkModel.findOneAndUpdate({ admin: true }, { enabled: state });
+  status = await antiLinkModel.findOne({ admin: true });
+  if (!status) return false;
+  return status.enabled as boolean;
+}
+
+async function addAllowedURL(url: string, user: User): Promise<{ set: boolean; info: string }> {
+  const check = await antiLinkModel.findOne({ url: url });
+  if (check) {
+    return { set: false, info: 'URL already allowed' };
+  }
+  new antiLinkModel({ url: url, timestamp: Date.now(), user: user, admin: false, enabled: false }).save();
+  return { set: true, info: url };
+}
+
+function removeAllowedURL(url: string): void {
+  antiLinkModel.findOneAndDelete({ url: url });
 }
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {

@@ -1,7 +1,7 @@
 import { ChannelType, GuildMemberRoleManager, Message, TextChannel, Webhook, WebhookType } from 'discord.js';
 import { DiscordInviteRegex, HypixelAPIKeyRegex, IPAddressPattern, URLRegex } from '../utils/regex';
 import { getStickyMessage, updateStickyMessage } from '../commands/sticky';
-import { getAllowedDomains, getAntiLinkState } from '../utils/mongo';
+import { getAllowedDomains, getAntiLinkState } from '../commands/automod';
 import { autoModBypassRole } from '../../config.json';
 import DiscordManager from '../DiscordManager';
 import Infraction from '../utils/Infraction';
@@ -14,11 +14,9 @@ class MessageHandler {
     this.discord = discordManager;
     this.updateAllowedDomains();
   }
-
   async updateAllowedDomains() {
     this.allowedDomains = await getAllowedDomains();
   }
-
   async onMessage(message: Message) {
     if (!message.member) return;
     const sticky = await getStickyMessage(message.channel.id);
@@ -41,24 +39,19 @@ class MessageHandler {
       );
     }
   }
-
   async getWebhook(
     channel: TextChannel
   ): Promise<Webhook<WebhookType.ChannelFollower | WebhookType.Incoming> | undefined> {
     const webhooks = await channel.fetchWebhooks();
-
     if (0 === webhooks.size) {
       channel.createWebhook({
         name: channel.client.user.globalName ?? channel.client.user.username,
         avatar: channel.client.user.avatarURL()
       });
-
       await this.getWebhook(channel);
     }
-
     return webhooks.first();
   }
-
   async isUrlAllowed(url: string): Promise<boolean> {
     const antiLinkState = await getAntiLinkState();
     if (false === antiLinkState) return false;
@@ -78,7 +71,6 @@ class MessageHandler {
     }
     return false;
   }
-
   async AutoModPickup(message: Message, alertMessage?: string) {
     if (message.channel.type !== ChannelType.GuildText || !message.member) return;
     const webhook = await this.getWebhook(message.channel);
@@ -114,5 +106,4 @@ class MessageHandler {
       .save();
   }
 }
-
 export default MessageHandler;

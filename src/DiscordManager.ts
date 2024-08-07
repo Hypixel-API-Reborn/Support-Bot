@@ -1,20 +1,20 @@
 import { Client, GatewayIntentBits, Collection, REST, Routes } from 'discord.js';
 import InteractionHandler from './handlers/InteractionHandler';
 import MessageHandler from './handlers/MessageHandler';
-import { token, serverId } from '../config.json';
-import CheckPermits from './utils/CheckPermits';
+import StateHandler from './handlers/StateHandler';
 import { SlashCommand } from './types/main';
-import { connectDB } from './utils/mongo';
+import { token } from '../config.json';
 import { readdirSync } from 'fs';
-import cron from 'node-cron';
 
 class DiscordManager {
   interactionHandler: InteractionHandler;
   messageHandler: MessageHandler;
+  stateHandler: StateHandler;
   client?: Client;
   constructor() {
     this.interactionHandler = new InteractionHandler(this);
     this.messageHandler = new MessageHandler(this);
+    this.stateHandler = new StateHandler(this);
   }
 
   connect(): void {
@@ -28,19 +28,11 @@ class DiscordManager {
     });
 
     this.deployCommands();
-    this.client.on('ready', () => this.ready());
+    this.client.on('ready', () => this.stateHandler.onReady());
     this.client.on('messageCreate', (message) => this.messageHandler.onMessage(message));
     this.client.on('interactionCreate', (interaction) => this.interactionHandler.onInteraction(interaction));
 
     this.client.login(token).catch((e) => console.log(e));
-  }
-
-  async ready() {
-    if (!this.client) return;
-    console.log(`Logged in as ${this.client.user?.username} (${this.client.user?.id})!`);
-    global.guild = await this.client.guilds.fetch(serverId);
-    cron.schedule(`* * * * *`, () => CheckPermits());
-    connectDB();
   }
 
   async deployCommands(): Promise<void> {

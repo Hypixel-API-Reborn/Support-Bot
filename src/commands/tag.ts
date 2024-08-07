@@ -2,17 +2,51 @@ import {
   ModalActionRowComponentBuilder,
   ChatInputCommandInteraction,
   AutocompleteInteraction,
-  PermissionFlagsBits,
   SlashCommandBuilder,
   TextInputBuilder,
   ActionRowBuilder,
   TextInputStyle,
   ModalBuilder,
-  EmbedBuilder,
   ChannelType
 } from 'discord.js';
-import { deleteTag, getTag, getTagNames } from '../utils/mongo';
 import { supportCategory } from '../../config.json';
+import { model, Schema } from 'mongoose';
+
+const tagSchema = new Schema({ name: String, content: String });
+const TagModel = model('Tag', tagSchema);
+
+export function saveTag(name: string, content: string): void {
+  new TagModel({ name: name, content: content }).save();
+}
+
+export async function modifyTag(name: string, content: string): Promise<boolean> {
+  const modifiedTag = await TagModel.findOneAndUpdate({ name: name }, { content: content });
+  if (!modifiedTag) return false;
+  return true;
+}
+
+export function deleteTag(name: string): void {
+  TagModel.findOneAndDelete({ name: name });
+}
+
+export async function getTag(name: string): Promise<string | null> {
+  const tag = await TagModel.findOne({ name: name });
+  if (!tag || !tag.content) return null;
+  return tag.content;
+}
+
+export async function getTagNames(): Promise<string[]> {
+  const tags = await TagModel.find();
+  if (tags) {
+    const names: string[] = [];
+    tags.forEach((tag) => {
+      if (!tag.name) return;
+      return names.push(tag.name);
+    });
+    return names;
+  }
+  return [];
+}
 
 export const data = new SlashCommandBuilder()
   .setName('tag')
@@ -41,20 +75,13 @@ export const data = new SlashCommandBuilder()
       .addStringOption((option) =>
         option.setName('name').setDescription('The name of the tag').setRequired(true).setAutocomplete(true)
       )
-      .addUserOption((option) =>
-        option.setName('user').setDescription('The user to mention this tag to').setRequired(false)
-      )
-      .addStringOption((option) =>
-        option.setName('message-link').setDescription('The Message link to reply with the tag').setRequired(false)
-      )
   )
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
   .setDMPermission(false);
 
 export async function autoComplete(interaction: AutocompleteInteraction): Promise<void> {
   const focusedOption = interaction.options.getFocused(true);
   const input = focusedOption.value;
-  const names = (await getTagNames()).names;
+  const names = await getTagNames();
   if (!names) return;
   let choices: string | string[] = [];
   if (
@@ -71,27 +98,30 @@ export async function autoComplete(interaction: AutocompleteInteraction): Promis
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
   try {
-    if (!interaction.member) return;
     const subCommand = interaction.options.getSubcommand();
     switch (subCommand) {
       case 'add': {
-        const modal = new ModalBuilder().setCustomId('tagForm').setTitle('Please enter the tag information');
-        const tagFormName = new TextInputBuilder()
-          .setStyle(TextInputStyle.Short)
-          .setCustomId('tagFormName')
-          .setRequired(true)
-          .setLabel('Name');
-        const tagFormContent = new TextInputBuilder()
-          .setStyle(TextInputStyle.Paragraph)
-          .setCustomId('tagFormContent')
-          .setLabel('Tag Content')
-          .setRequired(true);
-        const tagFormNameReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(tagFormName);
-        const tagFormContentReason = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-          tagFormContent
+        await interaction.showModal(
+          new ModalBuilder()
+            .setCustomId('tagForm')
+            .setTitle('Please enter the tag information')
+            .addComponents(
+              new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+                new TextInputBuilder()
+                  .setStyle(TextInputStyle.Short)
+                  .setCustomId('tagFormName')
+                  .setRequired(true)
+                  .setLabel('Name')
+              ),
+              new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+                new TextInputBuilder()
+                  .setStyle(TextInputStyle.Paragraph)
+                  .setCustomId('tagFormContent')
+                  .setLabel('Tag Content')
+                  .setRequired(true)
+              )
+            )
         );
-        modal.addComponents(tagFormNameReason, tagFormContentReason);
-        await interaction.showModal(modal);
         break;
       }
       case 'edit': {
@@ -116,79 +146,28 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       case 'delete': {
         const name = interaction.options.getString('name');
         if (!name) return;
-        const inputTag = await deleteTag(name.toLowerCase());
-        if (inputTag.success) {
-          await interaction.reply({ content: 'Tag deleted successfully', ephemeral: true });
-          return;
-        }
-        await interaction.reply({ content: 'Tag not found', ephemeral: true });
+        deleteTag(name.toLowerCase());
+        await interaction.reply({ content: 'Tag deleted successfully', ephemeral: true });
         return;
       }
       case 'send': {
         const name = interaction.options.getString('name');
         if (!name) return;
-        let messageLink = interaction.options.getString('message-link') || null;
-        const user = interaction.options.getUser('user');
         const inputTag = await getTag(name.toLowerCase());
-        if (!inputTag.success) await interaction.reply({ content: 'Tag not found', ephemeral: true });
-        if (!inputTag.tag?.status) return;
-        await interaction.deferReply({ ephemeral: true });
-        if (messageLink) {
-          if (!messageLink.includes('discord.com/channels/')) {
-            await interaction.followUp({ content: 'Invalid message link', ephemeral: true });
-            return;
-          }
-          if (!messageLink.includes('https://')) {
-            await interaction.followUp({ content: 'Invalid message link', ephemeral: true });
-            return;
-          }
-          if (messageLink.startsWith('https://canary.discord.com')) {
-            messageLink = messageLink.replace('canary.', '');
-          }
-          if (messageLink.startsWith('https://ptb.discord.com')) {
-            messageLink = messageLink.replace('ptb.', '');
-          }
-          const split = messageLink.split('https://discord.com/channels/')[1].split('/');
-          const channel = await interaction.client.channels.fetch(split[1]);
-          if (!channel) {
-            await interaction.followUp({ content: 'Channel not found', ephemeral: true });
-            return;
-          }
-          if (channel.type !== ChannelType.GuildText) {
-            await interaction.followUp({ content: 'Invalid channel type', ephemeral: true });
-            return;
-          }
-          if (channel.parentId !== supportCategory) {
-            await interaction.followUp({ content: 'Tags can only be sent in support channels', ephemeral: true });
-            return;
-          }
-          const message = await channel.messages.fetch(split[2]);
-          if (!message) {
-            await interaction.followUp({ content: 'Message not found', ephemeral: true });
-            return;
-          }
-          message.reply({ content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content });
-        } else {
-          if (!interaction.channel) return;
-          if (interaction.channel.type !== ChannelType.GuildText) {
-            return;
-          }
-          if (interaction.channel.parentId !== supportCategory) {
-            await interaction.followUp({ content: 'Tags can only be sent in support channels', ephemeral: true });
-            return;
-          }
-          interaction.channel.send({
-            content: user ? `${user.toString()}\n\n${inputTag.tag.content}` : inputTag.tag.content
-          });
+        if (!inputTag) {
+          await interaction.reply({ content: 'Tag not found', ephemeral: true });
+          return;
         }
-        await interaction.followUp({ content: `Tag \`${name}\` sent` });
-        return;
+        if (!interaction.channel || interaction.channel.type !== ChannelType.GuildText) return;
+        if (interaction.channel.parentId !== supportCategory) {
+          await interaction.reply({ content: inputTag, ephemeral: true });
+          return;
+        }
+        await interaction.reply({ content: inputTag });
+        break;
       }
       default: {
-        const embed = new EmbedBuilder()
-          .setTitle('Invalid subcommand')
-          .setDescription('Please provide a valid subcommand');
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ content: 'Invalid subcommand Please provide a valid subcommand', ephemeral: true });
       }
     }
   } catch (error) {
