@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* Credits https://github.com/DuckySoLucky/hypixel-discord-chat-bridge/blob/f8a8a8e1e1c469127b8fcd03e6553b43f22b8250/src/Logger.js (Edited) */
-const customLevels = { event: 0, error: 1, other: 2, max: 3 };
+/* eslint-disable no-console */
+const customLevels = { discord: 0, other: 1, warn: 2, error: 3, max: 4 };
 import { createLogger, format, transports } from 'winston';
-const timezone = () => {
+import chalk from 'chalk';
+function getCurrentTime() {
   return new Date().toLocaleString('en-US', {
     year: 'numeric',
     month: 'numeric',
@@ -10,44 +10,35 @@ const timezone = () => {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
-    hour12: false
+    hour12: false,
+    timeZoneName: 'short',
+    timeZone: 'UTC'
   });
-};
+}
 
-const eventTransport = new transports.File({ level: 'event', filename: './logs/event.log' });
-const errorTransport = new transports.File({ level: 'error', filename: './logs/error.log' });
+const discordTransport = new transports.File({ level: 'discord', filename: './logs/discord.log' });
 const otherTransport = new transports.File({ level: 'other', filename: './logs/other.log' });
+const warnTransport = new transports.File({ level: 'warn', filename: './logs/warn.log' });
+const errorTransport = new transports.File({ level: 'error', filename: './logs/error.log' });
 const combinedTransport = new transports.File({ level: 'max', filename: './logs/combined.log' });
 
-const eventLogger = createLogger({
-  level: 'event',
+const discordLogger = createLogger({
+  level: 'discord',
   levels: customLevels,
   format: format.combine(
-    format.timestamp({ format: timezone }),
+    format.timestamp({ format: getCurrentTime }),
     format.printf(({ timestamp, level, message }) => {
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
   ),
-  transports: [eventTransport, combinedTransport]
-});
-
-const errorLogger = createLogger({
-  level: 'error',
-  levels: customLevels,
-  format: format.combine(
-    format.timestamp({ format: timezone }),
-    format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
-    })
-  ),
-  transports: [errorTransport, combinedTransport]
+  transports: [discordTransport, combinedTransport]
 });
 
 const otherLogger = createLogger({
   level: 'other',
   levels: customLevels,
   format: format.combine(
-    format.timestamp({ format: timezone }),
+    format.timestamp({ format: getCurrentTime }),
     format.printf(({ timestamp, level, message }) => {
       return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
     })
@@ -55,21 +46,56 @@ const otherLogger = createLogger({
   transports: [otherTransport, combinedTransport]
 });
 
-const logger = {
-  event: (message: any) => {
-    eventLogger.log('event', message);
-    console.log(message);
-  },
-  error: (message: any) => {
-    errorLogger.log('error', message);
-    console.log(message);
-  },
-  other: (message: any) => {
-    otherLogger.log('other', message);
-    console.log(message);
-  }
-};
+const warnLogger = createLogger({
+  level: 'warn',
+  levels: customLevels,
+  format: format.combine(
+    format.timestamp({ format: getCurrentTime }),
+    format.printf(({ timestamp, level, message }) => {
+      return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
+    })
+  ),
+  transports: [warnTransport, combinedTransport]
+});
 
-export const eventMessage = logger.event;
-export const errorMessage = logger.error;
-export const otherMessage = logger.other;
+const errorLogger = createLogger({
+  level: 'error',
+  levels: customLevels,
+  format: format.combine(
+    format.timestamp({ format: getCurrentTime }),
+    format.printf(({ timestamp, level, message }) => {
+      return `[${timestamp}] ${level.toUpperCase()} > ${message}`;
+    })
+  ),
+  transports: [errorTransport, combinedTransport]
+});
+
+class Logger {
+  public discord(message: string) {
+    discordLogger.log('discord', message);
+    return console.log(chalk.bgMagenta.black(`[${getCurrentTime()}] Discord >`) + ' ' + chalk.magenta(message));
+  }
+
+  public other(message: string) {
+    otherLogger.log('other', message);
+    return console.log(chalk.bgCyan.black(`[${getCurrentTime()}] Other >`) + ' ' + chalk.cyan(message));
+  }
+
+  public warn(message: string) {
+    warnLogger.log('warn', message);
+    return console.log(chalk.bgYellow.black(`[${getCurrentTime()}] Warning >`) + ' ' + chalk.yellow(message));
+  }
+
+  public error(error: Error) {
+    const errorString = `${error.toString()}${error.stack?.replace(error.toString(), '')}`;
+    errorLogger.log('error', errorString);
+    return console.log(chalk.bgRedBright.black(`[${getCurrentTime()}] Error >`) + ' ' + chalk.redBright(errorString));
+  }
+}
+
+export const discordMessage = new Logger().discord;
+export const otherMessage = new Logger().other;
+export const warnMessage = new Logger().warn;
+export const errorMessage = new Logger().error;
+
+export default Logger;

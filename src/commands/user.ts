@@ -8,6 +8,7 @@ import {
 } from 'discord.js';
 import Infraction, { getUserInfractions } from '../utils/Infraction';
 import { getInfractionEmbed, getUserInfoEmbed } from '../utils/user';
+import { errorMessage } from '../utils/logger';
 import ms from 'ms';
 
 export const data = new SlashCommandBuilder()
@@ -192,7 +193,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       }
     }
   } catch (error) {
-    console.log(error);
+    if (error instanceof Error) errorMessage(error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ content: 'Something went wrong. Please try again later.', ephemeral: true });
       return;

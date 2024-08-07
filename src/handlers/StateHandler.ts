@@ -12,7 +12,9 @@ class StateHandler {
 
   async onReady() {
     if (!this.discord.client) return;
-    console.log(`Logged in as ${this.discord.client.user?.username} (${this.discord.client.user?.id})!`);
+    this.discord.logger.discord(
+      `Logged in as ${this.discord.client.user?.username} (${this.discord.client.user?.id})!`
+    );
     global.guild = await this.discord.client.guilds.fetch(serverId);
     this.connectDB();
     schedule(`* * * * *`, () => CheckPermits());
@@ -20,7 +22,7 @@ class StateHandler {
 
   private connectDB() {
     connect(mongoURL).then(() => {
-      console.log('Connected to MongoDB');
+      this.discord.logger.other('Connected to MongoDB');
     });
   }
 }

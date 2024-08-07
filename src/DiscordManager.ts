@@ -5,16 +5,19 @@ import StateHandler from './handlers/StateHandler';
 import { SlashCommand } from './types/main';
 import { token } from '../config.json';
 import { readdirSync } from 'fs';
+import Logger from './utils/logger';
 
 class DiscordManager {
   interactionHandler: InteractionHandler;
   messageHandler: MessageHandler;
   stateHandler: StateHandler;
   client?: Client;
+  logger: Logger;
   constructor() {
     this.interactionHandler = new InteractionHandler(this);
     this.messageHandler = new MessageHandler(this);
     this.stateHandler = new StateHandler(this);
+    this.logger = new Logger();
   }
 
   connect(): void {
@@ -32,7 +35,7 @@ class DiscordManager {
     this.client.on('messageCreate', (message) => this.messageHandler.onMessage(message));
     this.client.on('interactionCreate', (interaction) => this.interactionHandler.onInteraction(interaction));
 
-    this.client.login(token).catch((e) => console.log(e));
+    this.client.login(token).catch((e) => this.logger.error(e));
   }
 
   async deployCommands(): Promise<void> {
@@ -50,7 +53,7 @@ class DiscordManager {
     const rest = new REST({ version: '10' }).setToken(token);
     const clientID = Buffer.from(token.split('.')[0], 'base64').toString('ascii');
     await rest.put(Routes.applicationCommands(clientID), { body: commands });
-    console.log(`Successfully reloaded ${commands.length} application command(s).`);
+    this.logger.discord(`Successfully reloaded ${commands.length} application command(s).`);
   }
 }
 

@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import { supportCategory } from '../../config.json';
 import { model, Schema } from 'mongoose';
+import { errorMessage } from '../utils/logger';
 
 const tagSchema = new Schema({ name: String, content: String });
 const TagModel = model('Tag', tagSchema);
@@ -171,7 +172,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       }
     }
   } catch (error) {
-    console.log(error);
+    if (error instanceof Error) errorMessage(error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ content: 'Something went wrong. Please try again later.', ephemeral: true });
       return;

@@ -58,6 +58,7 @@ export default [
       'no-multi-str': 'warn',
       'no-lonely-if': 'warn',
       'no-new-func': 'error',
+      'no-console': 'error',
       camelcase: 'warn',
       'no-var': 'warn',
       eqeqeq: 'warn',

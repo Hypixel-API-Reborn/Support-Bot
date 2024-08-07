@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits, 
 import { User, UserSchema } from '../utils/Infraction';
 import { autoModBypassRole } from '../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
+import { errorMessage } from '../utils/logger';
 import { model, Schema } from 'mongoose';
 import ms from 'ms';
 
@@ -266,7 +267,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       }
     }
   } catch (error) {
-    console.log(error);
+    if (error instanceof Error) errorMessage(error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ content: 'Something went wrong. Please try again later.', ephemeral: true });
       return;

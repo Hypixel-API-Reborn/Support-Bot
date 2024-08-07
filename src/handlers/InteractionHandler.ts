@@ -30,27 +30,26 @@ class InteractionHandler {
     if (!interaction.member || !interaction.channel || !interaction.guild) return;
     const command = interaction.client.commands.get(interaction.commandName);
     try {
-      console.log(
+      this.discord.logger.discord(
         `Interaction Event trigged by ${interaction.user.username} (${interaction.user.id}) ran command ${
           interaction.commandName
         } in ${interaction.guild.id} in ${interaction.channel.id}`
       );
       await command.execute(interaction);
     } catch (error) {
-      console.log(error);
+      if (error instanceof Error) this.discord.logger.error(error);
     }
   }
 
   async autoCompleteInteraction(interaction: AutocompleteInteraction) {
     const command = interaction.client.commands.get(interaction.commandName);
     if (!command) {
-      console.error(`No command matching ${interaction.commandName} was found.`);
       return;
     }
     try {
       await command.autoComplete(interaction);
     } catch (error) {
-      console.error(error);
+      if (error instanceof Error) this.discord.logger.error(error);
     }
   }
 
@@ -78,7 +77,7 @@ class InteractionHandler {
   async buttonInteraction(interaction: ButtonInteraction): Promise<void> {
     if (!interaction.channel || !interaction.guild) return;
     await interaction.deferReply({ ephemeral: true });
-    console.log(
+    this.discord.logger.discord(
       `Interaction Event trigged by ${interaction.user.username} (${interaction.user.id}) clicked button ${
         interaction.customId
       } in ${interaction.guild.id} in ${interaction.channel.id}`
