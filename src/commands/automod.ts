@@ -13,6 +13,7 @@ import DiscordManager from '../DiscordManager';
 import { model, Schema } from 'mongoose';
 import Command from '../utils/Command';
 import ms from 'ms';
+import isStaffMember from '../utils/isStaffMember';
 
 export interface UserPermit {
   id: string;
@@ -254,7 +255,7 @@ class AutoModCommand extends Command {
               }
               const check = await addAllowedURL(url, {
                 id: interaction.user.id,
-                staff: true,
+                staff: await isStaffMember(interaction.user.id),
                 bot: interaction.user.bot
               });
               if (false === check.set) {

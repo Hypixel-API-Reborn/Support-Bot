@@ -13,6 +13,7 @@ import { getInfractionEmbed, getUserInfoEmbed } from '../utils/user';
 import DiscordManager from '../DiscordManager';
 import Command from '../utils/Command';
 import ms from 'ms';
+import isStaffMember from '../utils/isStaffMember';
 
 class UserCommand extends Command {
   data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -125,8 +126,12 @@ class UserCommand extends Command {
             reason: reason,
             type: 'WARN',
             long: null,
-            user: { id: commandUser.id, staff: false, bot: commandUser.bot },
-            staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+            user: { id: commandUser.id, staff: await isStaffMember(commandUser.id), bot: commandUser.bot },
+            staff: {
+              id: interaction.user.id,
+              staff: await isStaffMember(interaction.user.id),
+              bot: interaction.user.bot
+            },
             timestamp: Date.now(),
             extraInfo: { url: '', messageId: '', channelId: '' }
           })
@@ -142,8 +147,12 @@ class UserCommand extends Command {
             reason: reason,
             type: 'KICK',
             long: null,
-            user: { id: commandUser.id, staff: false, bot: commandUser.bot },
-            staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+            user: { id: commandUser.id, staff: await isStaffMember(commandUser.id), bot: commandUser.bot },
+            staff: {
+              id: interaction.user.id,
+              staff: await isStaffMember(interaction.user.id),
+              bot: interaction.user.bot
+            },
             timestamp: Date.now(),
             extraInfo: { url: '', messageId: '', channelId: '' }
           })
@@ -170,8 +179,12 @@ class UserCommand extends Command {
             reason: reason,
             type: 'MUTE',
             long,
-            user: { id: commandUser.id, staff: false, bot: commandUser.bot },
-            staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+            user: { id: commandUser.id, staff: await isStaffMember(commandUser.id), bot: commandUser.bot },
+            staff: {
+              id: interaction.user.id,
+              staff: await isStaffMember(interaction.user.id),
+              bot: interaction.user.bot
+            },
             timestamp: Date.now(),
             extraInfo: { url: '', messageId: '', channelId: '' }
           })
@@ -188,8 +201,12 @@ class UserCommand extends Command {
             reason: reason,
             type: 'UNMUTE',
             long: null,
-            user: { id: commandUser.id, staff: false, bot: commandUser.bot },
-            staff: { id: interaction.user.id, staff: true, bot: interaction.user.bot },
+            user: { id: commandUser.id, staff: await isStaffMember(commandUser.id), bot: commandUser.bot },
+            staff: {
+              id: interaction.user.id,
+              staff: await isStaffMember(interaction.user.id),
+              bot: interaction.user.bot
+            },
             timestamp: Date.now(),
             extraInfo: { url: '', messageId: '', channelId: '' }
           })

@@ -6,6 +6,7 @@ import { autoModBypassRole } from '../../config.json';
 import DiscordManager from '../DiscordManager';
 import Infraction from '../utils/Infraction';
 import { writeFileSync } from 'fs';
+import isStaffMember from '../utils/isStaffMember';
 
 class MessageHandler {
   discord: DiscordManager;
@@ -97,7 +98,7 @@ class MessageHandler {
       reason: 'Automod Pickup',
       long: null,
       type: 'AutoMod',
-      user: { id: message.author.id, staff: false, bot: message.author.bot },
+      user: { id: message.author.id, staff: await isStaffMember(message.author.id), bot: message.author.bot },
       staff: { id: message.client.user.id, staff: true, bot: message.client.user.bot },
       timestamp: Date.now(),
       extraInfo: { url: message.url, messageId: webHookMsg.id, channelId: message.channel.id }

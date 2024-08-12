@@ -172,7 +172,8 @@ class Infraction {
           new ButtonBuilder()
             .setLabel('Delete Message')
             .setStyle(ButtonStyle.Danger)
-            .setCustomId(`messageDelete.${this.infraction.extraInfo.channelId}.${this.infraction.extraInfo.messageId}`),
+            .setCustomId(`messageDelete.${this.infraction.extraInfo.channelId}.${this.infraction.extraInfo.messageId}`)
+            .setEmoji('<:icons_delete:1249309581490786372>'),
           new ButtonBuilder()
             .setCustomId(`infractions.${this.infraction.user.id}`)
             .setLabel('View User Infractions')

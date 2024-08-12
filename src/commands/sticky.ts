@@ -10,6 +10,7 @@ import { UserSchema } from '../utils/Infraction';
 import DiscordManager from '../DiscordManager';
 import { model, Schema } from 'mongoose';
 import Command from '../utils/Command';
+import isStaffMember from '../utils/isStaffMember';
 
 const stickySchema = new Schema({ content: String, message: String, channel: String, user: UserSchema });
 const stickyModel = model('Sticky', stickySchema);
@@ -83,7 +84,11 @@ class StickyComand extends Command {
             content: message,
             message: sentMessage.id,
             channel: interaction.channel.id,
-            user: { id: interaction.user.id, staff: true, bot: interaction.user.bot }
+            user: {
+              id: interaction.user.id,
+              staff: await isStaffMember(interaction.user.id),
+              bot: interaction.user.bot
+            }
           }).save();
           await interaction.reply({ content: 'Sticky message has been set', ephemeral: true });
           break;
