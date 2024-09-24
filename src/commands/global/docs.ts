@@ -4,8 +4,8 @@ import {
   SlashCommandBuilder,
   EmbedBuilder
 } from 'discord.js';
-import DiscordManager from '../DiscordManager';
-import Command from '../utils/Command';
+import DiscordManager from '../../DiscordManager';
+import Command from '../../utils/Command';
 import Doc from 'discord.js-docs';
 
 class DocsCommand extends Command {
@@ -29,15 +29,15 @@ class DocsCommand extends Command {
           .setTitle('Hypixel API • Reborn Documentation')
           .setDescription(
             'The documentation for Hypixel API • Reborn can be found [here](https://hypixel-api-reborn.github.io).'
-          );
+          )
+          .setColor(0xff8c00);
         await interaction.reply({ embeds: [embed] });
         return;
       }
-      const docs = await Doc.fetch(
-        'https://raw.githubusercontent.com/hypixel-api-reborn/hypixel-api-reborn/docs/master.json',
-        { force: true }
-      );
-      await interaction.reply({ embeds: [docs.resolveEmbed(query)] });
+      const docs = await Doc.fetch('master');
+      await interaction.reply({
+        embeds: [docs.resolveEmbed(query) || new EmbedBuilder().setColor(0xff8c00).setTitle('Nothing Found')]
+      });
     } catch (error) {
       if (error instanceof Error) this.discord.logger.error(error);
       if (interaction.replied || interaction.deferred) {

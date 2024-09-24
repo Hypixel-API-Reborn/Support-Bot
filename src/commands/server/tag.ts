@@ -11,10 +11,10 @@ import {
   ModalBuilder,
   ChannelType
 } from 'discord.js';
-import { supportCategory } from '../../config.json';
-import DiscordManager from '../DiscordManager';
+import { supportCategory } from '../../../config.json';
+import DiscordManager from '../../DiscordManager';
 import { model, Schema } from 'mongoose';
-import Command from '../utils/Command';
+import Command from '../../utils/Command';
 
 const tagSchema = new Schema({ name: String, content: String });
 const TagModel = model('Tag', tagSchema);
@@ -83,8 +83,7 @@ class TagCommanmd extends Command {
           .addStringOption((option) =>
             option.setName('name').setDescription('The name of the tag').setRequired(true).setAutocomplete(true)
           )
-      )
-      .setDMPermission(false);
+      );
   }
 
   async autoComplete(interaction: AutocompleteInteraction): Promise<void> {

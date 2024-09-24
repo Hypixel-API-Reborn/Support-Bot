@@ -1,6 +1,6 @@
 import { autoModBypassRole } from '../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
-import { UserPermit } from '../commands/automod';
+import { UserPermit } from '../commands/server/automod';
 
 export default function CheckPermits() {
   const permitData = readFileSync('data/permit.json');

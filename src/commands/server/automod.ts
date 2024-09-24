@@ -6,14 +6,14 @@ import {
   PermissionFlagsBits,
   EmbedBuilder
 } from 'discord.js';
-import { User, UserSchema } from '../utils/Infraction';
-import { autoModBypassRole } from '../../config.json';
+import { User, UserSchema } from '../../utils/Infraction';
+import { autoModBypassRole } from '../../../config.json';
 import { readFileSync, writeFileSync } from 'fs';
-import DiscordManager from '../DiscordManager';
+import DiscordManager from '../../DiscordManager';
 import { model, Schema } from 'mongoose';
-import Command from '../utils/Command';
+import Command from '../../utils/Command';
 import ms from 'ms';
-import isStaffMember from '../utils/isStaffMember';
+import isStaffMember from '../../utils/isStaffMember';
 
 export interface UserPermit {
   id: string;
@@ -132,8 +132,7 @@ class AutoModCommand extends Command {
               )
           )
       )
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-      .setDMPermission(false);
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
   }
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {

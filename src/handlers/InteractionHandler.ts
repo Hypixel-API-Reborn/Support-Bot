@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import { getUserInfractions } from '../utils/Infraction';
 import { teamRole, devRole } from '../../config.json';
-import { modifyTag, saveTag } from '../commands/tag';
+import { modifyTag, saveTag } from '../commands/server/tag';
 import { getInfractionEmbed } from '../utils/user';
 import DiscordManager from '../DiscordManager';
 
@@ -27,13 +27,12 @@ class InteractionHandler {
   }
 
   async commandInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
-    if (!interaction.member || !interaction.channel || !interaction.guild) return;
     const command = interaction.client.commands.get(interaction.commandName);
     try {
       this.discord.logger.discord(
-        `Interaction Event trigged by ${interaction.user.username} (${interaction.user.id}) ran command ${
-          interaction.commandName
-        } in ${interaction.guild.id} in ${interaction.channel.id}`
+        `Interaction Event trigged by ${interaction.user.username} (${
+          interaction.user.id
+        }) ran command ${interaction.commandName}`
       );
       await command.execute(interaction);
     } catch (error) {
@@ -80,7 +79,7 @@ class InteractionHandler {
     this.discord.logger.discord(
       `Interaction Event trigged by ${interaction.user.username} (${interaction.user.id}) clicked button ${
         interaction.customId
-      } in ${interaction.guild.id} in ${interaction.channel.id}`
+      }`
     );
     if (interaction.customId.startsWith('infractions.')) {
       const userId = interaction.customId.split('.')[1];

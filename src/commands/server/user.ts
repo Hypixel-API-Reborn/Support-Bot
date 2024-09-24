@@ -8,12 +8,12 @@ import {
   ButtonBuilder,
   ButtonStyle
 } from 'discord.js';
-import Infraction, { getUserInfractions } from '../utils/Infraction';
-import { getInfractionEmbed, getUserInfoEmbed } from '../utils/user';
-import DiscordManager from '../DiscordManager';
-import Command from '../utils/Command';
+import Infraction, { getUserInfractions } from '../../utils/Infraction';
+import { getInfractionEmbed, getUserInfoEmbed } from '../../utils/user';
+import DiscordManager from '../../DiscordManager';
+import Command from '../../utils/Command';
 import ms from 'ms';
-import isStaffMember from '../utils/isStaffMember';
+import isStaffMember from '../../utils/isStaffMember';
 
 class UserCommand extends Command {
   data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -73,8 +73,7 @@ class UserCommand extends Command {
             option.setName('reason').setDescription('The reason for the mute').setRequired(false)
           )
       )
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-      .setDMPermission(false);
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
   }
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {

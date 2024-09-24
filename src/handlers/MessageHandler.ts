@@ -1,7 +1,7 @@
 import { ChannelType, GuildMemberRoleManager, Message, TextChannel, Webhook, WebhookType } from 'discord.js';
 import { DiscordInviteRegex, HypixelAPIKeyRegex, IPAddressPattern, URLRegex } from '../utils/regex';
-import { getStickyMessage, updateStickyMessage } from '../commands/sticky';
-import { getAllowedDomains, getAntiLinkState } from '../commands/automod';
+import { getStickyMessage, updateStickyMessage } from '../commands/server/sticky';
+import { getAllowedDomains, getAntiLinkState } from '../commands/server/automod';
 import { autoModBypassRole } from '../../config.json';
 import DiscordManager from '../DiscordManager';
 import Infraction from '../utils/Infraction';
@@ -21,7 +21,7 @@ class MessageHandler {
   async onMessage(message: Message) {
     if (!message.member) return;
     const sticky = await getStickyMessage(message.channel.id);
-    if (null !== sticky && message.author !== message.client.user) {
+    if (null !== sticky && message.author !== message.client.user && message.channel.isSendable()) {
       message.channel.messages.fetch(sticky.message).then((message) => message.delete());
       const newMsg = await message.channel.send({ content: sticky.content });
       updateStickyMessage(message.channel.id, newMsg.id);

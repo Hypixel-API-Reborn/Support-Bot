@@ -6,11 +6,11 @@ import {
   SlashCommandBuilder,
   ChannelType
 } from 'discord.js';
-import { UserSchema } from '../utils/Infraction';
-import DiscordManager from '../DiscordManager';
+import { UserSchema } from '../../utils/Infraction';
+import DiscordManager from '../../DiscordManager';
 import { model, Schema } from 'mongoose';
-import Command from '../utils/Command';
-import isStaffMember from '../utils/isStaffMember';
+import Command from '../../utils/Command';
+import isStaffMember from '../../utils/isStaffMember';
 
 const stickySchema = new Schema({ content: String, message: String, channel: String, user: UserSchema });
 const stickyModel = model('Sticky', stickySchema);
@@ -68,13 +68,12 @@ class StickyComand extends Command {
               .setRequired(false)
           )
       )
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-      .setDMPermission(false);
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
   }
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
     try {
-      if (!interaction.channel) return;
+      if (!interaction.channel || !interaction.channel.isSendable()) return;
       const subCommand = interaction.options.getSubcommand();
       switch (subCommand) {
         case 'set': {

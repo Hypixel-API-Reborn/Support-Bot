@@ -5,9 +5,9 @@ import {
   SlashCommandBuilder,
   PermissionFlagsBits
 } from 'discord.js';
-import DiscordManager from '../DiscordManager';
-import Command from '../utils/Command';
-import { bugReports } from '../../config.json';
+import DiscordManager from '../../DiscordManager';
+import Command from '../../utils/Command';
+import { bugReports } from '../../../config.json';
 
 class BugReportsCommand extends Command {
   data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
@@ -60,8 +60,7 @@ class BugReportsCommand extends Command {
       )
       .addSubcommand((subcommand) => subcommand.setName('lock').setDescription('Lock a Bug Report'))
       .addSubcommand((subcommand) => subcommand.setName('unlock').setDescription('Unlock a Bug Report'))
-      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
-      .setDMPermission(false);
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages);
   }
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
