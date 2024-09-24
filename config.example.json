@@ -3,9 +3,21 @@
   "mongoURL": "MONGO_DB_URL",
   "teamRole": "TEAM_ROLE_ID",
   "devRole": "DEV_ROLE_ID",
-  "contributorsRole": "CONTRIBUTORS_ROLE_ID",
   "supportCategory": "SUPPORT_CATEGORY_ID",
   "autoModBypassRole": "AUTOMOD_BYPASS_ROLE_ID",
   "serverId": "SERVER_ID",
-  "infractionLogchannel": "INFRACTION_LOG_CHANNEL"
+  "infractionLogchannel": "INFRACTION_LOG_CHANNEL",
+  "bugReports": {
+    "channelId": "BUG_REPORTS_CHANNEL_ID",
+    "tags": {
+      "fixed": "TAG_ID",
+      "confirmed": "TAG_ID",
+      "wontFix": "TAG_ID",
+      "fixedOnGithub": "TAG_ID",
+      "duplicate": "TAG_ID",
+      "package": "TAG_ID",
+      "bot": "TAG_ID",
+      "missingInfo": "TAG_ID"
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Collection, REST, Routes } from 'discord.js';
 import InteractionHandler from './handlers/InteractionHandler';
+import BugReportHandler from './handlers/BugReportHandler';
 import MessageHandler from './handlers/MessageHandler';
 import StateHandler from './handlers/StateHandler';
 import { SlashCommand } from './types/main';
@@ -9,12 +10,14 @@ import { readdirSync } from 'fs';
 
 class DiscordManager {
   interactionHandler: InteractionHandler;
+  bugReportHandler: BugReportHandler;
   messageHandler: MessageHandler;
   stateHandler: StateHandler;
   client?: Client;
   logger: Logger;
   constructor() {
     this.interactionHandler = new InteractionHandler(this);
+    this.bugReportHandler = new BugReportHandler(this);
     this.messageHandler = new MessageHandler(this);
     this.stateHandler = new StateHandler(this);
     this.logger = new Logger();
@@ -34,6 +37,7 @@ class DiscordManager {
     this.client.on('ready', () => this.stateHandler.onReady());
     this.client.on('messageCreate', (message) => this.messageHandler.onMessage(message));
     this.client.on('interactionCreate', (interaction) => this.interactionHandler.onInteraction(interaction));
+    this.client.on('threadCreate', (channel) => this.bugReportHandler.onCreate(channel));
 
     this.client.login(token).catch((e) => this.logger.error(e));
   }

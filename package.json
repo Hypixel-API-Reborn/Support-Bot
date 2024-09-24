@@ -10,7 +10,8 @@
     "lint": "npx eslint src/ index.ts --fix",
     "prettier": "npx prettier --write src/ index.ts",
     "prettier:check": "npx prettier --check src/ index.ts",
-    "build": "npx tsc --build"
+    "build": "npx tsc --build",
+    "dev": "npx nodemon"
   },
   "keywords": [],
   "author": "Kathund",
@@ -42,6 +43,7 @@
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.9.0",
+    "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2",
