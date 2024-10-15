@@ -18,8 +18,8 @@ importers:
         specifier: github:Hypixel-API-Reborn/discord.js-docs
         version: https://codeload.github.com/Hypixel-API-Reborn/discord.js-docs/tar.gz/5ad964d6fa4e00706e3a082678c7b67a15a00fe9
       mongoose:
-        specifier: ^8.7.0
-        version: 8.7.0
+        specifier: ^8.7.1
+        version: 8.7.1
       ms:
         specifier: ^2.1.3
         version: 2.1.3
@@ -825,8 +825,8 @@ packages:
       socks:
         optional: true
 
-  mongoose@8.7.0:
-    resolution: {integrity: sha512-rUCSF1mMYQXjXYdqEQLLlMD3xbcj2j1/hRn+9VnVj7ipzru/UoUZxlj/hWmteKMAh4EFnDZ+BIrmma9l/0Hi1g==}
+  mongoose@8.7.1:
+    resolution: {integrity: sha512-RpNMyhyzLVCVbf8xTVbrf/18G3MqQzNw5pJdvOJ60fzbCa3cOZzz9L+8XpqzBXtRlgZGWv0T7MmOtvrT8ocp1Q==}
     engines: {node: '>=16.20.1'}
 
   mpath@0.9.0:
@@ -1857,7 +1857,7 @@ snapshots:
       bson: 6.8.0
       mongodb-connection-string-url: 3.0.1
 
-  mongoose@8.7.0:
+  mongoose@8.7.1:
     dependencies:
       bson: 6.8.0
       kareem: 2.6.3
