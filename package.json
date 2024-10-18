@@ -27,7 +27,7 @@
   "type": "module",
   "dependencies": {
     "chalk": "^5.3.0",
-    "discord.js": "^14.16.2",
+    "discord.js": "^14.16.3",
     "discord.js-docs": "github:Hypixel-API-Reborn/discord.js-docs",
     "mongoose": "^8.7.2",
     "ms": "^2.1.3",
