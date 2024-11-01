@@ -12,8 +12,8 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       discord.js:
-        specifier: ^14.16.2
-        version: 14.16.2
+        specifier: ^14.16.3
+        version: 14.16.3
       discord.js-docs:
         specifier: github:Hypixel-API-Reborn/discord.js-docs
         version: https://codeload.github.com/Hypixel-API-Reborn/discord.js-docs/tar.gz/5ad964d6fa4e00706e3a082678c7b67a15a00fe9
@@ -531,6 +531,9 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
+  discord-api-types@0.37.100:
+    resolution: {integrity: sha512-a8zvUI0GYYwDtScfRd/TtaNBDTXwP5DiDVX7K5OmE+DRT57gBqKnwtOC5Ol8z0mRW8KQfETIgiB8U0YZ9NXiCA==}
+
   discord-api-types@0.37.83:
     resolution: {integrity: sha512-urGGYeWtWNYMKnYlZnOnDHm8fVRffQs3U0SpE8RHeiuLKb/u92APS8HoQnPTFbnXmY1vVnXjXO4dOxcAn3J+DA==}
 
@@ -542,8 +545,8 @@ packages:
     version: 0.3.0
     engines: {node: '>=16.20.2'}
 
-  discord.js@14.16.2:
-    resolution: {integrity: sha512-VGNi9WE2dZIxYM8/r/iatQQ+3LT8STW4hhczJOwm+DBeHq66vsKDCk8trChNCB01sMO9crslYuEMeZl2d7r3xw==}
+  discord.js@14.16.3:
+    resolution: {integrity: sha512-EPCWE9OkA9DnFFNrO7Kl1WHHDYFXu3CNVFJg63bfU7hVtjZGyhShwZtSBImINQRWxWP2tgo2XI+QhdXx28r0aA==}
     engines: {node: '>=18'}
 
   enabled@2.0.0:
@@ -1547,6 +1550,8 @@ snapshots:
 
   deep-is@0.1.4: {}
 
+  discord-api-types@0.37.100: {}
+
   discord-api-types@0.37.83: {}
 
   discord-api-types@0.37.97: {}
@@ -1554,7 +1559,7 @@ snapshots:
   discord.js-docs@https://codeload.github.com/Hypixel-API-Reborn/discord.js-docs/tar.gz/5ad964d6fa4e00706e3a082678c7b67a15a00fe9:
     dependencies:
       common-tags: 1.8.2
-      discord.js: 14.16.2
+      discord.js: 14.16.3
       fuse.js: 3.6.1
       node-fetch: 2.7.0
     transitivePeerDependencies:
@@ -1562,7 +1567,7 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  discord.js@14.16.2:
+  discord.js@14.16.3:
     dependencies:
       '@discordjs/builders': 1.9.0
       '@discordjs/collection': 1.5.3
@@ -1571,7 +1576,7 @@ snapshots:
       '@discordjs/util': 1.1.1
       '@discordjs/ws': 1.1.1
       '@sapphire/snowflake': 3.5.3
-      discord-api-types: 0.37.97
+      discord-api-types: 0.37.100
       fast-deep-equal: 3.1.3
       lodash.snakecase: 4.1.1
       tslib: 2.7.0
